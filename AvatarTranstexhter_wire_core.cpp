@@ -1,0 +1,1 @@
+#include "AvatarTranstexhter_wire_core.h"
