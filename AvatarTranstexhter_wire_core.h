@@ -1,8 +1,15 @@
+#include "Print.h"
+#include "Arduino.h"
 #include <Wire.h>
 
+//デバイスのI2Cアドレス
 #define MOUTH_ADDRESS 0x37
 #define STEPPER_ADDRESS 0x38
 #define DC_MOTOR_ADDRESS 0x39
+
+//コマンド
+const byte SET_STEPPER_SPEED =  0x10;
+const byte SET_STEPPER_STEP =  0x11;
 
 enum role_module{
   MASTER,
@@ -16,11 +23,16 @@ class AvatarTranstexhter_wire_core{
   private:
     TwoWire* core_wire;
     role_module core_role;
+    boolean enable_serial = false;
 
   public:
-    AvatarTranstexhter_wire_core(TwoWire* wire, role_module role){
+    AvatarTranstexhter_wire_core(TwoWire* wire, role_module role = MASTER, int serial_speed = 0){
       core_wire = wire;
       core_role = role;
+      if(serial_speed != 0){
+        Serial.begin(serial_speed);
+        enable_serial = true;
+      }
       switch(core_role){
         case MASTER:
           core_wire->begin();
@@ -38,6 +50,9 @@ class AvatarTranstexhter_wire_core{
     }
 
     //ステッピングモーター速度調整用コマンド(マスター側)
-
-    
+    boolean setStepperSpeed(int speed);
+    //ステッピングモーター回転用コマンド(マスター側)
+    boolean setStepperStep(int step); 
+    //ステッピングモーター制御用デバイス受信コマンド(スレーブ側)
+    boolean receiveStepperModule(byte* cmd, int* value); 
 };
