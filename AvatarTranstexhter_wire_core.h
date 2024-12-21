@@ -25,30 +25,14 @@ class AvatarTranstexhter_wire_core{
   private:
     TwoWire* core_wire;
     role_module core_role;
+    int core_serial_speed;
     boolean enable_serial = false;
 
   public:
     AvatarTranstexhter_wire_core(TwoWire* wire, role_module role = MASTER, int serial_speed = 0){
       core_wire = wire;
       core_role = role;
-      if(serial_speed != 0){
-        Serial.begin(serial_speed);
-        enable_serial = true;
-      }
-      switch(core_role){
-        case MASTER:
-          core_wire->begin();
-        break;
-        case MOUTH_MODULE:
-          core_wire->begin(MOUTH_ADDRESS);
-        break;
-        case  STEPPER_MODULE:
-          core_wire->begin(STEPPER_ADDRESS);
-        break;
-        case DC_MOTOR_ADDRESS:
-          core_wire->begin(DC_MOTOR_ADDRESS);
-        break;
-      }
+      core_serial_speed = serial_speed;
     }
     //初期化
     void init();

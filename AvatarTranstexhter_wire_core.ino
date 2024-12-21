@@ -4,11 +4,19 @@ AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, MAST
 
 void setup() {
   // put your setup code here, to run once:
-  
+  myAvatar.init();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  myAvatar.setStepperSpeed(100);
+  delay(100);
+  myAvatar.setStepperStep(250);
+  delay(100);
+  Serial.print("Speed: ");
+  Serial.println(myAvatar.getStepperSpeed());
+  Serial.print("Step: ");
+  Serial.println(myAvatar.getStepperStep());
+  delay(1000);
 }
 

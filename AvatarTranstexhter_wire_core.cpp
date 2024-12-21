@@ -3,6 +3,10 @@
 
 //初期化
 void AvatarTranstexhter_wire_core::init(){
+  if(core_serial_speed > 0){
+    Serial.begin(core_serial_speed);
+    enable_serial = true;
+  }
   switch(core_role){
     case MASTER:
       core_wire->begin();
