@@ -10,6 +10,8 @@
 //コマンド
 const byte SET_STEPPER_SPEED =  0x10;
 const byte SET_STEPPER_STEP =  0x11;
+const byte GET_STEPPER_SPEED =  0x12;
+const byte GET_STEPPER_STEP =  0x13;
 
 enum role_module{
   MASTER,
@@ -48,11 +50,18 @@ class AvatarTranstexhter_wire_core{
         break;
       }
     }
-
+    //初期化
+    void init();
     //ステッピングモーター速度調整用コマンド(マスター側)
     boolean setStepperSpeed(int speed);
     //ステッピングモーター回転用コマンド(マスター側)
     boolean setStepperStep(int step); 
+    //ステッピングモーターの設定速度を取得するコマンド(マスター側)
+    int getStepperSpeed();
+    //ステッピングモーターの回転角を取得するコマンド(マスター側)
+    int getStepperStep();
     //ステッピングモーター制御用デバイス受信コマンド(スレーブ側)
     boolean receiveStepperModule(byte* cmd, int* value); 
+    //スレーブ側からステッピングモーターの情報を送信(スレーブ側)
+    boolean sentInfoStpper(int value);
 };
