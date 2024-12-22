@@ -8,10 +8,10 @@
 #define DC_MOTOR_ADDRESS 0x39
 
 //コマンド
-const byte SET_STEPPER_SPEED =  0x10;
-const byte SET_STEPPER_STEP =  0x11;
-const byte GET_STEPPER_SPEED =  0x12;
-const byte GET_STEPPER_STEP =  0x13;
+const String SET_STEPPER_SPEED =  "SET_STEPPER_SPEED";
+const String SET_STEPPER_STEP =  "SET_STEPPER_STEP";
+const String GET_STEPPER_SPEED =  "GET_STEPPER_SPEED";
+const String GET_STEPPER_STEP =  "GET_STEPPER_STEP";
 
 enum role_module{
   MASTER,
@@ -28,6 +28,8 @@ class AvatarTranstexhter_wire_core{
     int core_serial_speed;
     boolean enable_serial = false;
 
+    void sent_wire(String cmd, long value, byte address);
+
   public:
     AvatarTranstexhter_wire_core(TwoWire* wire, role_module role = MASTER, int serial_speed = 0){
       core_wire = wire;
@@ -37,15 +39,15 @@ class AvatarTranstexhter_wire_core{
     //初期化
     void init();
     //ステッピングモーター速度調整用コマンド(マスター側)
-    boolean setStepperSpeed(int speed);
+    boolean setStepperSpeed(long speed);
     //ステッピングモーター回転用コマンド(マスター側)
-    boolean setStepperStep(int step); 
+    boolean setStepperStep(long step); 
     //ステッピングモーターの設定速度を取得するコマンド(マスター側)
     int getStepperSpeed();
     //ステッピングモーターの回転角を取得するコマンド(マスター側)
     int getStepperStep();
     //ステッピングモーター制御用デバイス受信コマンド(スレーブ側)
-    boolean receiveStepperModule(byte* cmd, int* value); 
+    boolean receiveStepperModule(String* cmd, long* value); 
     //スレーブ側からステッピングモーターの情報を送信(スレーブ側)
-    boolean sentInfoStpper(int value);
+    boolean sentInfoStpper(long value);
 };
