@@ -49,26 +49,29 @@ boolean AvatarTranstexhter_wire_core::setStepperStep(long step){
 }
 
 //ステッピングモーターの設定速度を取得するコマンド(マスター側)
-int AvatarTranstexhter_wire_core::getStepperSpeed(){
+int AvatarTranstexhter_wire_core::getStepperSpeed(int timeout){
   int value = 0;
   if(core_role != MASTER){
     if(enable_serial == true){
       Serial.println("This function is not available for this device role.");
     }
-    return false;
+    return 0;
   }
   sent_wire(GET_STEPPER_SPEED, 0, STEPPER_ADDRESS);
-  if(core_wire->requestFrom(STEPPER_ADDRESS, 2) == 2){
-    byte high = core_wire->read();
-    byte low = core_wire->read();
-    value = (high << 8) | low;
-    return value;
+  if(timeout != 0){
+    long start = millis();
+    while(timeout >= (millis() - start) || core_wire->available() == 0){}
+  }
+  if(core_wire->available() == 0){
+    return 0;
+  }else{
+    
   }
   return 0;
 }
 
 //ステッピングモーターの回転角を取得するコマンド(マスター側)
-int AvatarTranstexhter_wire_core::getStepperStep(){
+int AvatarTranstexhter_wire_core::getStepperStep(int timeout){
   int value = 0;
   if(core_role != MASTER){
     if(enable_serial == true){
@@ -114,8 +117,6 @@ boolean AvatarTranstexhter_wire_core::receiveStepperModule(String* cmd, long* va
           colonIndex++; 
         }
       }
-      // Serial.println(sentCmd.substring(colon[0] + 1, colon[1]));
-      // Serial.println(sentCmd.substring(colon[2] + 1, sentCmd.length()).toInt());
       *cmd = sentCmd.substring(colon[0] + 1, colon[1]);
       *value = sentCmd.substring(colon[2] + 1, sentCmd.length()).toInt();
       return true;
@@ -130,7 +131,7 @@ boolean AvatarTranstexhter_wire_core::receiveStepperModule(String* cmd, long* va
 
 //スレーブ側からステッピングモーターの情報を送信(スレーブ側)
 boolean AvatarTranstexhter_wire_core::sentInfoStpper(long value){
-  sent_wire("", value, 0);
+  sent_wire("", value);
   if(enable_serial == true){
     Serial.println("Send wire");
     Serial.print("value: ");
@@ -139,7 +140,7 @@ boolean AvatarTranstexhter_wire_core::sentInfoStpper(long value){
   return true;
 }
 
-//送信用関数
+////cmdとvalueを定めたルールに則って文字列にし、送信する
 void AvatarTranstexhter_wire_core::sent_wire(String cmd, long value, byte address){
   String sentCmd = "cmd:" + cmd + ":value:" + String(value); 
   if(enable_serial == true){

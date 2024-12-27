@@ -27,8 +27,9 @@ class AvatarTranstexhter_wire_core{
     role_module core_role;
     int core_serial_speed;
     boolean enable_serial = false;
-
-    void sent_wire(String cmd, long value, byte address);
+    //cmdとvalueを定めたルールに則って文字列にし、送信する
+    void sent_wire(String cmd, long value, byte address = 0);
+    
 
   public:
     AvatarTranstexhter_wire_core(TwoWire* wire, role_module role = MASTER, int serial_speed = 0){
@@ -43,9 +44,9 @@ class AvatarTranstexhter_wire_core{
     //ステッピングモーター回転用コマンド(マスター側)
     boolean setStepperStep(long step); 
     //ステッピングモーターの設定速度を取得するコマンド(マスター側)
-    int getStepperSpeed();
+    int getStepperSpeed(int timeout = 0);
     //ステッピングモーターの回転角を取得するコマンド(マスター側)
-    int getStepperStep();
+    int getStepperStep(int timeout = 0);
     //ステッピングモーター制御用デバイス受信コマンド(スレーブ側)
     boolean receiveStepperModule(String* cmd, long* value); 
     //スレーブ側からステッピングモーターの情報を送信(スレーブ側)
