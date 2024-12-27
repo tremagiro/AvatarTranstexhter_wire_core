@@ -2,6 +2,11 @@
 #include "Arduino.h"
 #include "AvatarTranstexhter_wire_core.h"
 
+String SET_STEPPER_SPEED = "SET_STEPPER_SPEED";
+String SET_STEPPER_STEP =  "SET_STEPPER_STEP";
+String GET_STEPPER_SPEED =  "GET_STEPPER_SPEED";
+String GET_STEPPER_STEP =  "GET_STEPPER_STEP";
+
 //初期化
 void AvatarTranstexhter_wire_core::init(){
   if(core_serial_speed > 0){
@@ -49,8 +54,8 @@ boolean AvatarTranstexhter_wire_core::setStepperStep(long step){
 }
 
 //ステッピングモーターの設定速度を取得するコマンド(マスター側)
-int AvatarTranstexhter_wire_core::getStepperSpeed(int timeout){
-  int value = 0;
+long AvatarTranstexhter_wire_core::getStepperSpeed(int timeout){
+  long value = 0;
   if(core_role != MASTER){
     if(enable_serial == true){
       Serial.println("This function is not available for this device role.");
@@ -58,32 +63,43 @@ int AvatarTranstexhter_wire_core::getStepperSpeed(int timeout){
     return 0;
   }
   sent_wire(GET_STEPPER_SPEED, 0, STEPPER_ADDRESS);
+  delay(10);
+  core_wire->requestFrom(STEPPER_ADDRESS, 32);
   if(timeout != 0){
     long start = millis();
-    while(timeout >= (millis() - start) || core_wire->available() == 0){}
+    while(timeout >= (millis() - start) && core_wire->available() == 0);
   }
   if(core_wire->available() == 0){
     return 0;
   }else{
-    
+    String cmd;
+    split_cmd_value(&cmd, &value);
+    return value;
   }
   return 0;
 }
 
 //ステッピングモーターの回転角を取得するコマンド(マスター側)
-int AvatarTranstexhter_wire_core::getStepperStep(int timeout){
-  int value = 0;
+long AvatarTranstexhter_wire_core::getStepperStep(int timeout){
+  long value = 0;
   if(core_role != MASTER){
     if(enable_serial == true){
       Serial.println("This function is not available for this device role.");
     }
-    return false;
+    return 0;
   }
   sent_wire(GET_STEPPER_STEP, 0, STEPPER_ADDRESS);
-  if(core_wire->requestFrom(STEPPER_ADDRESS, 2) == 2){
-    byte high = core_wire->read();
-    byte low = core_wire->read();
-    value = (high << 8) | low;
+  delay(10);
+  core_wire->requestFrom(STEPPER_ADDRESS, 32);
+  if(timeout != 0){
+    long start = millis();
+    while(timeout >= (millis() - start) && core_wire->available() == 0);
+  }
+  if(core_wire->available() == 0){
+    return 0;
+  }else{
+    String cmd;
+    split_cmd_value(&cmd, &value);
     return value;
   }
   return 0;
@@ -97,11 +113,50 @@ boolean AvatarTranstexhter_wire_core::receiveStepperModule(String* cmd, long* va
     }
     return false;
   }
+  return split_cmd_value(cmd, value);
+}
+
+//スレーブ側からステッピングモーターの情報を送信(スレーブ側)
+boolean AvatarTranstexhter_wire_core::sentInfoStpper(long value){
+  sent_wire("", value);
+  if(enable_serial == true){
+    Serial.println("Send wire");
+    Serial.print("value: ");
+    Serial.println(value);
+  }
+  return true;
+}
+
+//cmdとvalueを定めたルールに則って文字列にし、送信する
+void AvatarTranstexhter_wire_core::sent_wire(String cmd, long value, byte address){
+  String sentCmd = "cmd:" + cmd + ":value:" + String(value) + ";"; 
+  if(enable_serial == true){
+    Serial.println(address);
+    Serial.println(sentCmd);
+  }
+  if(address == 0){
+    core_wire->write(sentCmd.c_str());
+    //core_wire->endTransmission();
+  }else{
+    core_wire->beginTransmission(address);
+    core_wire->write(sentCmd.c_str());
+    core_wire->endTransmission();
+  }
+}
+
+//文字列からcmdとvalueをそれぞれ分解する
+boolean AvatarTranstexhter_wire_core::split_cmd_value(String* cmd, long* value){
   if(core_wire->available() != 0){
     String sentCmd = "";
+    boolean over = false;
     while (core_wire->available() > 0) {
       char c = core_wire->read();
-      sentCmd += c;
+      if(c == ';'){
+        over = true;
+      }
+      if(over == false){
+        sentCmd += c;
+      }
     }
     if(enable_serial == true){
       Serial.println(sentCmd);
@@ -117,42 +172,21 @@ boolean AvatarTranstexhter_wire_core::receiveStepperModule(String* cmd, long* va
           colonIndex++; 
         }
       }
-      *cmd = sentCmd.substring(colon[0] + 1, colon[1]);
-      *value = sentCmd.substring(colon[2] + 1, sentCmd.length()).toInt();
-      return true;
+      if(enable_serial == true){
+        Serial.println(sentCmd);
+      }
+      if(colon[2] != 0){
+        *cmd = sentCmd.substring(colon[0] + 1, colon[1]);
+        *value = sentCmd.substring(colon[2] + 1, sentCmd.length()).toInt();
+        return true;
+      }else{
+        return false;
+      }
     }
     else{
       return false;
     }
   }else{
     return false;
-  }
-}
-
-//スレーブ側からステッピングモーターの情報を送信(スレーブ側)
-boolean AvatarTranstexhter_wire_core::sentInfoStpper(long value){
-  sent_wire("", value);
-  if(enable_serial == true){
-    Serial.println("Send wire");
-    Serial.print("value: ");
-    Serial.println(value);
-  }
-  return true;
-}
-
-////cmdとvalueを定めたルールに則って文字列にし、送信する
-void AvatarTranstexhter_wire_core::sent_wire(String cmd, long value, byte address){
-  String sentCmd = "cmd:" + cmd + ":value:" + String(value); 
-  if(enable_serial == true){
-    Serial.println(address);
-    Serial.println(sentCmd);
-  }
-  if(address == 0){
-    core_wire->write(sentCmd.c_str());
-    core_wire->endTransmission();
-  }else{
-    core_wire->beginTransmission(address);
-    core_wire->write(sentCmd.c_str());
-    core_wire->endTransmission();
   }
 }
