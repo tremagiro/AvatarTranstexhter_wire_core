@@ -16,10 +16,10 @@ void loop() {
   myAvatar.setStepperStep(-251);
   //設定したステッピングモーターの回転速度を取得
   Serial.print("speed : ");
-  Serial.println(myAvatar.getStepperSpeed());
+  Serial.println(myAvatar.getStepperSpeed(1000));
   //設定したステッピングモーターの回転角度を取得
   Serial.print("step : ");
-  Serial.println(myAvatar.getStepperStep());
+  Serial.println(myAvatar.getStepperStep(1000));
   delay(1000);
 }
 
