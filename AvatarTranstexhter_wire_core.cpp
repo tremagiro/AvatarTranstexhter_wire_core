@@ -1,4 +1,3 @@
-#include "USB/USBAPI.h"
 #include "Arduino.h"
 #include "AvatarTranstexhter_wire_core.h"
 
