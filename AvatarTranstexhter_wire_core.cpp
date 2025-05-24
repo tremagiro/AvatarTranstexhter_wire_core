@@ -6,9 +6,9 @@ String SET_STEPPER_STEP =  "SET_STEPPER_STEP";
 String GET_STEPPER_SPEED =  "GET_STEPPER_SPEED";
 String GET_STEPPER_STEP =  "GET_STEPPER_STEP";
 String SET_DC_MOTOR_L_SPEED = "SET_DC_MOTOR_L_SPEED";
-String GET_DC_MOTOR_L_SPEED = "GET_DC_MOTOR_L_SPEED";
+String GET_DC_MOTOR_L_SPEED =  "GET_DC_MOTOR_L_SPEED";
 String SET_DC_MOTOR_R_SPEED = "SET_DC_MOTOR_R_SPEED";
-String GET_DC_MOTOR_R_SPEED = "GET_DC_MOTOR_R_SPEED";
+String GET_DC_MOTOR_R_SPEED =  "GET_DC_MOTOR_R_SPEED";
 
 //初期化
 void AvatarTranstexhter_wire_core::init(){
@@ -131,19 +131,19 @@ boolean AvatarTranstexhter_wire_core::sentInfoStpper(long value){
 }
 
 //DCモーター速度調整用コマンド(マスター側)
-boolean AvatarTranstexhter_wire_core::setDcMotorSpeed(long speed){
+boolean AvatarTranstexhter_wire_core::setDcMotorLSpeed(long speed){
   if(core_role != MASTER){
     if(enable_serial == true){
       Serial.println("This function is not available for this device role.");
     }
     return false;
   }
-  sent_wire(SET_DC_MOTOR_SPEED, speed, DC_MOTOR_ADDRESS);
+  sent_wire(SET_DC_MOTOR_L_SPEED, speed, DC_MOTOR_ADDRESS);
   return true;
 }
 
 //DCモーターの設定速度を取得するコマンド(マスター側)
-long AvatarTranstexhter_wire_core::getDcMotorSpeed(int timeout){
+long AvatarTranstexhter_wire_core::getDcMotorLSpeed(int timeout){
   long value = 0;
   if(core_role != MASTER){
     if(enable_serial == true){
@@ -151,7 +151,45 @@ long AvatarTranstexhter_wire_core::getDcMotorSpeed(int timeout){
     }
     return 0;
   }
-  sent_wire(GET_DC_MOTOR_SPEED, 0, DC_MOTOR_ADDRESS);
+  sent_wire(GET_DC_MOTOR_L_SPEED, 0, DC_MOTOR_ADDRESS);
+  delay(10);
+  core_wire->requestFrom(DC_MOTOR_ADDRESS, 32);
+  if(timeout != 0){
+    long start = millis();
+    while(timeout >= (millis() - start) && core_wire->available() == 0);
+  }
+  if(core_wire->available() == 0){
+    return 0;
+  }else{
+    String cmd;
+    split_cmd_value(&cmd, &value);
+    return value;
+  }
+  return 0;
+}
+
+//DCモーター速度調整用コマンド(マスター側)
+boolean AvatarTranstexhter_wire_core::setDcMotorRSpeed(long speed){
+  if(core_role != MASTER){
+    if(enable_serial == true){
+      Serial.println("This function is not available for this device role.");
+    }
+    return false;
+  }
+  sent_wire(SET_DC_MOTOR_R_SPEED, speed, DC_MOTOR_ADDRESS);
+  return true;
+}
+
+//DCモーターの設定速度を取得するコマンド(マスター側)
+long AvatarTranstexhter_wire_core::getDcMotorRSpeed(int timeout){
+  long value = 0;
+  if(core_role != MASTER){
+    if(enable_serial == true){
+      Serial.println("This function is not available for this device role.");
+    }
+    return 0;
+  }
+  sent_wire(GET_DC_MOTOR_R_SPEED, 0, DC_MOTOR_ADDRESS);
   delay(10);
   core_wire->requestFrom(DC_MOTOR_ADDRESS, 32);
   if(timeout != 0){
