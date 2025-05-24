@@ -11,6 +11,8 @@ extern String SET_STEPPER_SPEED;
 extern String SET_STEPPER_STEP;
 extern String GET_STEPPER_SPEED;
 extern String GET_STEPPER_STEP;
+extern String SET_DC_MOTOR_SPEED;
+extern String GET_DC_MOTOR_SPEED;
 
 enum role_module{
   MASTER,
