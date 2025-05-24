@@ -53,4 +53,12 @@ class AvatarTranstexhter_wire_core{
     boolean receiveStepperModule(String* cmd, long* value); 
     //スレーブ側からステッピングモーターの情報を送信(スレーブ側)
     boolean sentInfoStpper(long value);
+    //ステッピングモーター速度調整用コマンド(マスター側)
+    boolean setDcMotorSpeed(long speed);
+    //DCモーターの設定速度を取得するコマンド(マスター側)
+    long getDcMotorSpeed(int timeout = 0);
+    //DCモーター制御用デバイス受信コマンド(スレーブ側)
+    boolean receiveDcMotorModule(String* cmd, long* value); 
+    //スレーブ側からDCモーターの情報を送信(スレーブ側)
+    boolean sentInfoDcMotor(long value);
 };

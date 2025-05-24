@@ -5,6 +5,8 @@ String SET_STEPPER_SPEED = "SET_STEPPER_SPEED";
 String SET_STEPPER_STEP =  "SET_STEPPER_STEP";
 String GET_STEPPER_SPEED =  "GET_STEPPER_SPEED";
 String GET_STEPPER_STEP =  "GET_STEPPER_STEP";
+String SET_DC_MOTOR_SPEED = "SET_DC_MOTOR_SPEED";
+String GET_DC_MOTOR_SPEED =  "GET_DC_MOTOR_SPEED";
 
 //初期化
 void AvatarTranstexhter_wire_core::init(){
@@ -124,6 +126,60 @@ boolean AvatarTranstexhter_wire_core::sentInfoStpper(long value){
     Serial.println(value);
   }
   return true;
+}
+
+//DCモーター速度調整用コマンド(マスター側)
+boolean AvatarTranstexhter_wire_core::setDcMotorSpeed(long speed){
+  if(core_role != MASTER){
+    if(enable_serial == true){
+      Serial.println("This function is not available for this device role.");
+    }
+    return false;
+  }
+  sent_wire(SET_DC_MOTOR_SPEED, speed, DC_MOTOR_ADDRESS);
+  return true;
+}
+
+//DCモーターの設定速度を取得するコマンド(マスター側)
+long AvatarTranstexhter_wire_core::getDcMotorSpeed(int timeout){
+  long value = 0;
+  if(core_role != MASTER){
+    if(enable_serial == true){
+      Serial.println("This function is not available for this device role.");
+    }
+    return 0;
+  }
+  sent_wire(GET_DC_MOTOR_SPEED, 0, DC_MOTOR_ADDRESS);
+  delay(10);
+  core_wire->requestFrom(DC_MOTOR_ADDRESS, 32);
+  if(timeout != 0){
+    long start = millis();
+    while(timeout >= (millis() - start) && core_wire->available() == 0);
+  }
+  if(core_wire->available() == 0){
+    return 0;
+  }else{
+    String cmd;
+    split_cmd_value(&cmd, &value);
+    return value;
+  }
+  return 0;
+}
+
+//DCモーター制御用デバイス受信コマンド(スレーブ側)
+boolean AvatarTranstexhter_wire_core::receiveDcMotorModule(String* cmd, long* value){ 
+  if(core_role != DC_MOTOR_MODULE){
+    if(enable_serial == true){
+      Serial.println("This function is not available for this device role.");
+    }
+    return false;
+  }
+  return split_cmd_value(cmd, value);
+}
+
+//スレーブ側からDCモーターの情報を送信(スレーブ側)
+boolean AvatarTranstexhter_wire_core::sentInfoDcMotor(long value){
+  return AvatarTranstexhter_wire_core::sentInfoStpper(value);
 }
 
 //cmdとvalueを定めたルールに則って文字列にし、送信する
