@@ -26,7 +26,7 @@ void AvatarTranstexhter_wire_core::init(){
     case  STEPPER_MODULE:
       core_wire->begin(STEPPER_ADDRESS);
     break;
-    case DC_MOTOR_ADDRESS:
+    case DC_MOTOR_MODULE:
       core_wire->begin(DC_MOTOR_ADDRESS);
     break;
   }
