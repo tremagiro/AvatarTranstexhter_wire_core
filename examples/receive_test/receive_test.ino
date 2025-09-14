@@ -27,7 +27,6 @@ void loop() {
 
 void systemSetup(){
   myAvatar.init();
-  Serial.begin(115200);
 }
 
 

@@ -14,6 +14,8 @@
 #define SET_DC_MOTOR_SPEED 0x05
 #define GET_DC_MOTOR_SPEED 0x06
 
+#define LIMIT_TRY_TIMES 5
+
 enum role_module{
   MASTER,
   MOUTH_MODULE,
@@ -23,7 +25,6 @@ enum role_module{
 };
 
 enum wire_result_enum{
-  NONE_RESULT,
   FAILURE,
   SUCCESS
 };
@@ -36,7 +37,7 @@ class AvatarTranstexhter_wire_core{
     int core_serial_speed;
     bool enable_serial = false;
     // wire_result_enum wire_result_global;
-    inline static wire_result_enum wire_result = NONE_RESULT;
+    inline static wire_result_enum wire_result = FAILURE;
     static void resuletEvent();
     
   public:

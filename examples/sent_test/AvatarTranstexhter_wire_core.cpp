@@ -1,3 +1,4 @@
+#include <machine/endian.h>
 #include <Wire.h>
 
 #include <cstddef>
@@ -6,34 +7,18 @@
 #include "Arduino.h"
 #include "AvatarTranstexhter_wire_core.h"
 
-// String SET_STEPPER_SPEED = "SET_STEPPER_SPEED";
-// String SET_STEPPER_STEP =  "SET_STEPPER_STEP";
-// String GET_STEPPER_SPEED =  "GET_STEPPER_SPEED";
-// String GET_STEPPER_STEP =  "GET_STEPPER_STEP";
-// String SET_DC_MOTOR_L_SPEED = "SET_DC_MOTOR_L_SPEED";
-// String GET_DC_MOTOR_L_SPEED =  "GET_DC_MOTOR_L_SPEED";
-// String SET_DC_MOTOR_R_SPEED = "SET_DC_MOTOR_R_SPEED";
-// String GET_DC_MOTOR_R_SPEED =  "GET_DC_MOTOR_R_SPEED";
-
 #define UP_BIT 32
 #define QUOTIENT_BIT 0xFF
 #define DWON_BIT 0xFFFFFFFF
 
-
-
 //受信結果の送信
 void AvatarTranstexhter_wire_core::resuletEvent(){
-  // wire_result_enum wire_result = wire_result_global;
-  while(wire_result == NONE_RESULT){
-    delay(Resend_Time);
-  }
   core_wire->write((byte)wire_result);
-  wire_result = NONE_RESULT;
+  wire_result = FAILURE;
 }
 
 //初期化
 void AvatarTranstexhter_wire_core::init(){
-   wire_result_enum wire_result = NONE_RESULT;
   if(core_serial_speed > 0){
     Serial.begin(core_serial_speed);
     enable_serial = true;
@@ -55,7 +40,6 @@ void AvatarTranstexhter_wire_core::init(){
   if(core_role != MASTER){
     core_wire->onRequest(resuletEvent);
   }
-  // wire_result = NONE_RESULT;
 }
 
 // I2C経由でコマンドを送信するメソッド 
@@ -68,35 +52,33 @@ void AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value
   int8_t cmd = (int8_t)command;
   int16_t val = (int16_t)value;
   int16_t sum = (int16_t)cmd + (int16_t)val;
-  Serial.println(sum);
 
-  // int successes = 0;
-  // while (successes < 5) {
+  int tryTimes = 0;
+  while (tryTimes < LIMIT_TRY_TIMES) {
     core_wire->beginTransmission(address);
     core_wire->write((uint8_t*)&cmd, sizeof(cmd));
     core_wire->write((uint8_t*)&val, sizeof(val));
     core_wire->write((uint8_t*)&sum, sizeof(sum));
     core_wire->endTransmission();
 
-  //   // core_wire->requestFrom(address, 1);
+    core_wire->requestFrom(address, 1);
 
-  //   // if(core_wire->available() > 0){
-  //   //   byte result = core_wire->read();
-  //   //   if(result == (byte)SUCCESS){
-  //   //     return;
-  //   //   }else{
-  //   //     successes++;
-  //   //   }
-  //   // }
-  // }
+    while(core_wire->available() <= 0);
+    byte result = core_wire->read();
+    if(result == (byte)SUCCESS){
+      return;
+    }else{
+      tryTimes++;
+    }
+  }
 }
 //文字列からcmdとvalueをそれぞれ分解する
 bool AvatarTranstexhter_wire_core::receive_read(int *command, int *value){
   int8_t cmd;
   int16_t val, sum;
   int8_t* data;
-  int successes = 0;
-  while (successes < 5) {
+  int tryTimes = 0;
+  while (tryTimes < LIMIT_TRY_TIMES) {
     if(core_wire->available() >= sizeof(cmd) + sizeof(val) + sizeof(sum)){
 
       cmd = core_wire->read();
@@ -114,15 +96,16 @@ bool AvatarTranstexhter_wire_core::receive_read(int *command, int *value){
 
       *command = (int)cmd;
       *value = (int)val;
-      Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
-      Serial.println(successes);
+      if(core_serial_speed <= 0){
+        Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
+      }
       if(sum != cmd + val){
         wire_result = FAILURE;
       }else{
         wire_result = SUCCESS;
         return true;
       }
-      successes++;
+      tryTimes++;
     }
   }
   return false;

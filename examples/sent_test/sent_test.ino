@@ -19,10 +19,9 @@ void loop() {
   static uint64_t command;
   systemSetup();
   while(1){
-    value = 400000;
-    command = SET_STEPPER_STEP;
+    value = 325;
+    command = SET_DC_MOTOR_SPEED;
     myAvatar.sent_wire(STEPPER_ADDRESS, command, value);
-    Serial.println("loop");
     delay(1000);
   }
 }
