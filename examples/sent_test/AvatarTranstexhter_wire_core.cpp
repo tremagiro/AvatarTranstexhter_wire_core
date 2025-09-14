@@ -70,25 +70,25 @@ void AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value
   int16_t sum = (int16_t)cmd + (int16_t)val;
   Serial.println(sum);
 
-  int successes = 0;
-  while (successes < 5) {
+  // int successes = 0;
+  // while (successes < 5) {
     core_wire->beginTransmission(address);
     core_wire->write((uint8_t*)&cmd, sizeof(cmd));
     core_wire->write((uint8_t*)&val, sizeof(val));
     core_wire->write((uint8_t*)&sum, sizeof(sum));
     core_wire->endTransmission();
 
-    core_wire->requestFrom(address, 1);
+  //   // core_wire->requestFrom(address, 1);
 
-    if(core_wire->available() > 0){
-      byte result = core_wire->read();
-      if(result == (byte)SUCCESS){
-        return;
-      }else{
-        successes++;
-      }
-    }
-  }
+  //   // if(core_wire->available() > 0){
+  //   //   byte result = core_wire->read();
+  //   //   if(result == (byte)SUCCESS){
+  //   //     return;
+  //   //   }else{
+  //   //     successes++;
+  //   //   }
+  //   // }
+  // }
 }
 //文字列からcmdとvalueをそれぞれ分解する
 bool AvatarTranstexhter_wire_core::receive_read(int *command, int *value){
