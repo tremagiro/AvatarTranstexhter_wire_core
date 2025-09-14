@@ -55,9 +55,9 @@ class AvatarTranstexhter_wire_core{
     void init();
     // ステッピングモーター
     // ステッピングモーター速度調整用メソッド(マスター側)
-    bool setStepperSpeed(int speed);
+    void setStepperSpeed(int speed);
     // ステッピングモーター回転用メソッド(マスター側)
-    bool setStepperStep(int step); 
+    void setStepperStep(int step); 
     // ステッピングモーターの設定速度を取得するメソッド(マスター側)
     int getStepperSpeed(int timeout = 0);
     // ステッピングモーターの回転角を取得するメソッド(マスター側)
@@ -65,10 +65,10 @@ class AvatarTranstexhter_wire_core{
     // ステッピングモーター制御用デバイス受信メソッド(スレーブ側)
     bool receiveStepperModule(int* cmd, int* value); 
     // スレーブ側からステッピングモーターの情報を送信メソッド(スレーブ側)
-    bool sentInfoStpper(int value);
+    void sentInfoStpper(int value);
     // DCモーター
     // DCモーターの速度調整用コマンド(マスター側)
-    bool setDcMotorSpeed(int speed_l, int speed_r);
+    void setDcMotorSpeed(int speed_l, int speed_r);
     // DCモーターの設定速度を取得するコマンド(マスター側)
     bool getDcMotorSpeed(int* speed_l, int* speed_r, int timeout = 0);
     // DCモーター制御用デバイス受信コマンド(スレーブ側)

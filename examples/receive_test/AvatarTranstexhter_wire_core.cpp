@@ -112,24 +112,30 @@ bool AvatarTranstexhter_wire_core::receive_read(int *command, int *value){
 }
 
 // ステッピングモーター
-// // ステッピングモーター速度調整用メソッド(マスター側)
-// bool setStepperSpeed(int speed);
-// // ステッピングモーター回転用メソッド(マスター側)
-// bool setStepperStep(int step); 
+// ステッピングモーター速度調整用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setStepperSpeed(int speed){
+  sent_wire(STEPPER_ADDRESS, SET_STEPPER_SPEED, speed);
+}
+// ステッピングモーター回転用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setStepperStep(int step){
+  sent_wire(STEPPER_ADDRESS, SET_STEPPER_STEP, step);
+}
 // // ステッピングモーターの設定速度を取得するメソッド(マスター側)
-// int getStepperSpeed(int timeout = 0);
+// int AvatarTranstexhter_wire_core::getStepperSpeed(int timeout = 0){
+  
+// }
 // // ステッピングモーターの回転角を取得するメソッド(マスター側)
-// int getStepperStep(int timeout = 0);
+// int AvatarTranstexhter_wire_core::getStepperStep(int timeout = 0);
 // // ステッピングモーター制御用デバイス受信メソッド(スレーブ側)
-// bool receiveStepperModule(int* cmd, int* value); 
+// bool AvatarTranstexhter_wire_core::receiveStepperModule(int* cmd, int* value); 
 // // スレーブ側からステッピングモーターの情報を送信メソッド(スレーブ側)
-// bool sentInfoStpper(int value);
+// void AvatarTranstexhter_wire_core::sentInfoStpper(int value);
 // // DCモーター
 // // DCモーターの速度調整用コマンド(マスター側)
-// bool setDcMotorSpeed(int speed_l, int speed_r);
+// void AvatarTranstexhter_wire_core::setDcMotorSpeed(int speed_l, int speed_r);
 // // DCモーターの設定速度を取得するコマンド(マスター側)
-// bool getDcMotorSpeed(int* speed_l, int* speed_r, int timeout = 0);
+// bool AvatarTranstexhter_wire_core::getDcMotorSpeed(int* speed_l, int* speed_r, int timeout = 0);
 // // DCモーター制御用デバイス受信コマンド(スレーブ側)
-// bool receiveDcMotorModule(String* cmd, int* value_l, int* value_r); 
+// bool AvatarTranstexhter_wire_core::receiveDcMotorModule(String* cmd, int* value_l, int* value_r); 
 // // スレーブ側からDCモーターの情報を送信(スレーブ側)
-// bool sentInfoDcMotor(int value);
+// bool AvatarTranstexhter_wire_core::sentInfoDcMotor(int value);
