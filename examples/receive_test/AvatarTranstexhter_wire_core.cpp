@@ -1,3 +1,4 @@
+#include "delay.h"
 #include <machine/endian.h>
 #include <Wire.h>
 
@@ -7,14 +8,19 @@
 #include "Arduino.h"
 #include "AvatarTranstexhter_wire_core.h"
 
-#define UP_BIT 32
-#define QUOTIENT_BIT 0xFF
-#define DWON_BIT 0xFFFFFFFF
-
 //受信結果の送信
 void AvatarTranstexhter_wire_core::resuletEvent(){
-  core_wire->write((byte)wire_result);
-  wire_result = FAILURE;
+  switch (resultStatus) {
+    case RESULT_SENT:
+      core_wire->write((byte)wire_result);
+      wire_result = FAILURE;
+      break;
+    case VALUE_SENT:
+      resultStatus = RESULT_SENT;
+      break;
+    default:
+      break;
+  }
 }
 
 //初期化
@@ -60,10 +66,15 @@ void AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value
     core_wire->write((uint8_t*)&val, sizeof(val));
     core_wire->write((uint8_t*)&sum, sizeof(sum));
     core_wire->endTransmission();
-
+    delay(10);
     core_wire->requestFrom(address, 1);
-
-    while(core_wire->available() <= 0);
+    unsigned long nowTime = millis();
+    while(core_wire->available() <= 0 && (millis() - nowTime) < LIMIT_WAIT_TIME){
+      delay(RESEND_TIME);
+    }
+    if((millis() - nowTime) >= LIMIT_WAIT_TIME){
+      return;
+    }
     byte result = core_wire->read();
     if(result == (byte)SUCCESS){
       return;
@@ -112,30 +123,29 @@ bool AvatarTranstexhter_wire_core::receive_read(int *command, int *value){
 }
 
 // ステッピングモーター
-// ステッピングモーター速度調整用メソッド(マスター側)
-void AvatarTranstexhter_wire_core::setStepperSpeed(int speed){
-  sent_wire(STEPPER_ADDRESS, SET_STEPPER_SPEED, speed);
+// ステッピングモーター設定用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setStepperSpeed(int speed, int step){
+
 }
-// ステッピングモーター回転用メソッド(マスター側)
-void AvatarTranstexhter_wire_core::setStepperStep(int step){
-  sent_wire(STEPPER_ADDRESS, SET_STEPPER_STEP, step);
+// ステッピングモーターの設定を取得するメソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getStepperSpeed(int* speed, int* step){
+  return true;
 }
-// // ステッピングモーターの設定速度を取得するメソッド(マスター側)
-// int AvatarTranstexhter_wire_core::getStepperSpeed(int timeout = 0){
-  
-// }
-// // ステッピングモーターの回転角を取得するメソッド(マスター側)
-// int AvatarTranstexhter_wire_core::getStepperStep(int timeout = 0);
-// // ステッピングモーター制御用デバイス受信メソッド(スレーブ側)
-// bool AvatarTranstexhter_wire_core::receiveStepperModule(int* cmd, int* value); 
-// // スレーブ側からステッピングモーターの情報を送信メソッド(スレーブ側)
-// void AvatarTranstexhter_wire_core::sentInfoStpper(int value);
-// // DCモーター
-// // DCモーターの速度調整用コマンド(マスター側)
-// void AvatarTranstexhter_wire_core::setDcMotorSpeed(int speed_l, int speed_r);
-// // DCモーターの設定速度を取得するコマンド(マスター側)
-// bool AvatarTranstexhter_wire_core::getDcMotorSpeed(int* speed_l, int* speed_r, int timeout = 0);
-// // DCモーター制御用デバイス受信コマンド(スレーブ側)
-// bool AvatarTranstexhter_wire_core::receiveDcMotorModule(String* cmd, int* value_l, int* value_r); 
-// // スレーブ側からDCモーターの情報を送信(スレーブ側)
-// bool AvatarTranstexhter_wire_core::sentInfoDcMotor(int value);
+// DCモーター
+// DCモーターの速度調整用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setDcMotor(int speed_l, int speed_r){
+
+}
+// DCモーターの設定速度を取得するメソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
+  return true;
+}
+// フロントディスプレイ
+// フロントディスプレイ設定用メソッド（マスター側）
+void AvatarTranstexhter_wire_core::setFrontDisplay(int typeImage, int loopTime){
+
+}
+// フロントディスプレイの設定を取得するメソッド（マスター側）
+bool AvatarTranstexhter_wire_core::getFrontDisplay(int* typeImage, int* loopTime){
+  return true;
+}

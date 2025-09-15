@@ -15,6 +15,7 @@
 #define GET_DC_MOTOR_SPEED 0x06
 
 #define LIMIT_TRY_TIMES 5
+#define LIMIT_WAIT_TIME 1000
 
 enum role_module{
   MASTER,
@@ -28,7 +29,12 @@ enum wire_result_enum{
   FAILURE,
   SUCCESS
 };
-#define Resend_Time 10 
+#define RESEND_TIME 10 
+
+enum result_status{
+  RESULT_SENT,
+  VALUE_SENT
+};
 
 class AvatarTranstexhter_wire_core{
   private:
@@ -38,6 +44,9 @@ class AvatarTranstexhter_wire_core{
     bool enable_serial = false;
     // wire_result_enum wire_result_global;
     inline static wire_result_enum wire_result = FAILURE;
+    inline static result_status resultStatus = RESULT_SENT;
+    inline static int sentValue0 = 0;
+    inline static int sentValue1 = 0;
     static void resuletEvent();
     
   public:
@@ -46,33 +55,25 @@ class AvatarTranstexhter_wire_core{
       core_role = role;
       core_serial_speed = serial_speed;
     }
+    //初期化
+    void init();
     //cmdとvalueを定めたルールに則って文字列にし、送信する
     void sent_wire(int address, int command, int value);
     //文字列からcmdとvalueをそれぞれ分解する
     bool receive_read(int *command, int *value);
-
-    //初期化
-    void init();
     // ステッピングモーター
-    // ステッピングモーター速度調整用メソッド(マスター側)
-    void setStepperSpeed(int speed);
-    // ステッピングモーター回転用メソッド(マスター側)
-    void setStepperStep(int step); 
-    // ステッピングモーターの設定速度を取得するメソッド(マスター側)
-    int getStepperSpeed(int timeout = 0);
-    // ステッピングモーターの回転角を取得するメソッド(マスター側)
-    int getStepperStep(int timeout = 0);
-    // ステッピングモーター制御用デバイス受信メソッド(スレーブ側)
-    bool receiveStepperModule(int* cmd, int* value); 
-    // スレーブ側からステッピングモーターの情報を送信メソッド(スレーブ側)
-    void sentInfoStpper(int value);
+    // ステッピングモーター設定用メソッド(マスター側)
+    void setStepperSpeed(int speed, int step);
+    // ステッピングモーターの設定を取得するメソッド(マスター側)
+    bool getStepperSpeed(int* speed, int* step);
     // DCモーター
-    // DCモーターの速度調整用コマンド(マスター側)
-    void setDcMotorSpeed(int speed_l, int speed_r);
-    // DCモーターの設定速度を取得するコマンド(マスター側)
-    bool getDcMotorSpeed(int* speed_l, int* speed_r, int timeout = 0);
-    // DCモーター制御用デバイス受信コマンド(スレーブ側)
-    bool receiveDcMotorModule(String* cmd, int* value_l, int* value_r); 
-    // スレーブ側からDCモーターの情報を送信(スレーブ側)
-    bool sentInfoDcMotor(int value);
+    // DCモーターの速度調整用メソッド(マスター側)
+    void setDcMotor(int speed_l, int speed_r);
+    // DCモーターの設定速度を取得するメソッド(マスター側)
+    bool getDcMotor(int* speed_l, int* speed_r);
+    // フロントディスプレイ
+    // フロントディスプレイ設定用メソッド（マスター側）
+    void setFrontDisplay(int typeImage, int loopTime);
+    // フロントディスプレイの設定を取得するメソッド（マスター側）
+    bool getFrontDisplay(int* typeImage, int* loopTime);
 };
