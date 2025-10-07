@@ -45,8 +45,8 @@ class AvatarTranstexhter_wire_core{
     // wire_result_enum wire_result_global;
     inline static wire_result_enum wire_result = FAILURE;
     inline static result_status resultStatus = RESULT_SENT;
-    inline static int sentValue0 = 0;
-    inline static int sentValue1 = 0;
+    inline static byte sentCmd = 0;
+    inline static int sentValue = 0;
     static void resuletEvent();
     
   public:
@@ -59,7 +59,7 @@ class AvatarTranstexhter_wire_core{
     void init();
     //cmdとvalueを定めたルールに則って文字列にし、送信する
     void sent_wire(int address, int command, int value);
-    //文字列からcmdとvalueをそれぞれ分解する
+    //受信したcmdとvalueを格納する
     bool receive_read(int *command, int *value);
     // ステッピングモーター
     // ステッピングモーター設定用メソッド(マスター側)
