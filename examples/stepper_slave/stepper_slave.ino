@@ -10,7 +10,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(myStepper.receiveStepInfo() == true){
+  if(myStepper.receiveStepperInfo() == true){
     Serial.printf("【設定値】speed : %d, step : %d \n", myStepper.getSpeed(), myStepper.getStep());
   }
 }

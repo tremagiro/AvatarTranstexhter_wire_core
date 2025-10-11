@@ -2,8 +2,8 @@
 
 AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, 115200);
 
-#define SPEED 230
-#define STEP 123
+#define SPEED_L 67
+#define SPEED_R -38
 
 void setup() {
   // put your setup code here, to run once:
@@ -14,13 +14,13 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   // 値送信
-  myAvatar.setStepperInfo(SPEED, STEP);
-  Serial.printf("【送信値】speed : %d, step : %d \n", SPEED, STEP);
+  myAvatar.setDcMotor(SPEED_L, SPEED_R);
+  Serial.printf("【送信値】speed_L : %d, speed_R : %d \n", SPEED_L, SPEED_R);
   delay(1000);
   // 値受信
-  int sp;
-  int st;
-  myAvatar.getStepperInfo(&sp, &st);
-  Serial.printf("【受信値】speed : %d, step : %d \n", sp, st);
+  int spL;
+  int spR;
+  myAvatar.getDcMotor(&spL, &spR);
+  Serial.printf("【受信値】speed_L : %d, speed_R : %d \n", spL, spR);
   delay(1000);
 }

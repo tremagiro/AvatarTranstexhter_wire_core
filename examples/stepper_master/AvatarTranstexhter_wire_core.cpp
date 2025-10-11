@@ -1,11 +1,3 @@
-#include "delay.h"
-#include <machine/endian.h>
-#include <Wire.h>
-
-#include <cstddef>
-#include <cstdint>
-#include <sys/_stdint.h>
-#include "Arduino.h"
 #include "AvatarTranstexhter_wire_core.h"
 
 //初期化
@@ -104,7 +96,7 @@ void AvatarTranstexhter_wire_core::slaveSentEvent(){
 }
 
 //受信したcmdとvalueを格納する
-bool AvatarTranstexhter_wire_core::receive_read(int *command, int *value){
+bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
   int8_t cmd;
   int16_t val, sum;
   int8_t* data;
@@ -178,9 +170,8 @@ bool AvatarTranstexhter_wire_core::getStepperInfo(int* speed, int* step){
   }
   return true;
 }
-
-// マスター側から受信した値をspeedとstepに格納する
-bool AvatarTranstexhterStepperSlave::receiveStepInfo(){
+// マスター側から通信を受け取るメソッド(スレーブ側)
+bool AvatarTranstexhterStepperSlave::receiveStepperInfo(){
   int command;
   int value;
   if(wireCore.receive_read(&command, &value)){
@@ -213,18 +204,131 @@ bool AvatarTranstexhterStepperSlave::receiveStepInfo(){
 // DCモーター
 // DCモーターの速度調整用メソッド(マスター側)
 void AvatarTranstexhter_wire_core::setDcMotor(int speed_l, int speed_r){
-
+  sent_wire(DC_MOTOR_ADDRESS, SET_DC_MOTOR_SPEED_L, speed_l);
+  sent_wire(DC_MOTOR_ADDRESS, SET_DC_MOTOR_SPEED_R, speed_r);
 }
-// // DCモーターの設定速度を取得するメソッド(マスター側)
-// bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
-//   return true;
-// }
+// DCモーターの設定速度を取得するメソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
+  // 左モータの回転速度の取得
+  sent_wire(DC_MOTOR_ADDRESS, GET_DC_MOTOR_SPEED_L, 0);
+  int command;
+  int count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(DC_MOTOR_ADDRESS, INFO_SIZE);
+    receive_read(&command, speed_l);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  // 右モータの回転速度の取得
+  sent_wire(STEPPER_ADDRESS, GET_DC_MOTOR_SPEED_R, 0);
+  count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(DC_MOTOR_ADDRESS, INFO_SIZE);
+    receive_read(&command, speed_r);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  return true;
+}
+// マスター側から通信を受け取るメソッド(スレーブ側)
+bool AvatarTranstexhterDcMotorSlave::receiveDcMotorInfo(){
+  int command;
+  int value;
+  if(wireCore.receive_read(&command, &value)){
+    switch (command) {
+      case SET_DC_MOTOR_SPEED_L:
+        speed_L = value;
+      break;
+      case SET_DC_MOTOR_SPEED_R:
+        speed_R = value;
+      break;
+      case GET_DC_MOTOR_SPEED_L:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_DC_MOTOR_SPEED_L);
+        wireCore.setSentValue(speed_L);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+      case GET_DC_MOTOR_SPEED_R:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_DC_MOTOR_SPEED_R);
+        wireCore.setSentValue(speed_L);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+    }
+    return true;
+  }else{
+    return false;
+  }
+}
+
 // フロントディスプレイ
 // フロントディスプレイ設定用メソッド（マスター側）
-void AvatarTranstexhter_wire_core::setFrontDisplay(int typeImage, int loopTime){
-
+void AvatarTranstexhter_wire_core::setFrontDisplay(int imageType, int loopTime){
+  sent_wire(MOUTH_ADDRESS, SET_MOUTH_IMAGE_TYPE, imageType);
+  sent_wire(MOUTH_ADDRESS, SET_MOUTH_LOOP_TIME, loopTime);
 }
-// // フロントディスプレイの設定を取得するメソッド（マスター側）
-// bool AvatarTranstexhter_wire_core::getFrontDisplay(int* typeImage, int* loopTime){
-//   return true;
-// }
+// フロントディスプレイの設定を取得するメソッド（マスター側）
+bool AvatarTranstexhter_wire_core::getFrontDisplay(int* imageType, int* loopTime){
+  // 画像種類の取得
+  sent_wire(MOUTH_ADDRESS, GET_MOUTH_IMAGE_TYPE, 0);
+  int command;
+  int count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(MOUTH_ADDRESS, INFO_SIZE);
+    receive_read(&command, imageType);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  // 周期時間の取得
+  sent_wire(MOUTH_ADDRESS, GET_MOUTH_LOOP_TIME, 0);
+  count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(MOUTH_ADDRESS, INFO_SIZE);
+    receive_read(&command, loopTime);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  return true;
+}
+// マスター側から通信を受け取るメソッド(スレーブ側)
+bool AvatarTranstexhterMouthSlave::receiveMouthInfo(){
+  int command;
+  int value;
+  if(wireCore.receive_read(&command, &value)){
+    switch (command) {
+      case SET_MOUTH_IMAGE_TYPE:
+        imageType = value;
+      break;
+      case SET_MOUTH_LOOP_TIME:
+        loopTime = value;
+      break;
+      case GET_MOUTH_IMAGE_TYPE:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_MOUTH_IMAGE_TYPE);
+        wireCore.setSentValue(imageType);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+      case GET_MOUTH_LOOP_TIME:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_MOUTH_LOOP_TIME);
+        wireCore.setSentValue(loopTime);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+    }
+    return true;
+  }else{
+    return false;
+  }
+}
