@@ -18,6 +18,8 @@ void loop() {
   static int value;
   static int command;
   systemSetup();
+  Serial.begin(115200);
+  Serial.println("start");
   while(1){
     if(myAvatar.receive_read(&command, &value) == true){
       Serial.printf("command = %d, value = %d\n", command, value);
