@@ -223,7 +223,7 @@ bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
     return false;
   }
   // 右モータの回転速度の取得
-  sent_wire(STEPPER_ADDRESS, GET_DC_MOTOR_SPEED_R, 0);
+  sent_wire(DC_MOTOR_ADDRESS, GET_DC_MOTOR_SPEED_R, 0);
   count = 0;
   do{// 正しい値が来るまで繰り返す
     delay(SWITCH_RECEVE);
