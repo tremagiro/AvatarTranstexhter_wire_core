@@ -16,7 +16,7 @@ void AvatarTranstexhter_wire_core::init(){
     case  STEPPER_MODULE:
       core_wire->begin(STEPPER_ADDRESS);
     break;
-    case DC_MOTOR_ADDRESS:
+    case DC_MOTOR_MODULE:
       core_wire->begin(DC_MOTOR_ADDRESS);
     break;
   }
@@ -257,7 +257,7 @@ bool AvatarTranstexhterDcMotorSlave::receiveDcMotorInfo(){
       case GET_DC_MOTOR_SPEED_R:
         delay(SWITCH_RECEVE);
         wireCore.setSentCmd(GET_DC_MOTOR_SPEED_R);
-        wireCore.setSentValue(speed_L);
+        wireCore.setSentValue(speed_R);
         wireCore.setResultStatus(VALUE_SENT);
       break;
     }

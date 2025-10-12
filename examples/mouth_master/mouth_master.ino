@@ -21,6 +21,6 @@ void loop() {
   int it;
   int lt;
   myAvatar.getFrontDisplay(&it, &lt);
-  Serial.printf("【受信値】speed : %d, step : %d \n", it, lt);
+  Serial.printf("【受信値】imageType : %d, loopTime : %d \n", it, lt);
   delay(1000);
 }
