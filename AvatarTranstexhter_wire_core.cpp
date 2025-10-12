@@ -1,14 +1,4 @@
-#include "Arduino.h"
 #include "AvatarTranstexhter_wire_core.h"
-
-String SET_STEPPER_SPEED = "SET_STEPPER_SPEED";
-String SET_STEPPER_STEP =  "SET_STEPPER_STEP";
-String GET_STEPPER_SPEED =  "GET_STEPPER_SPEED";
-String GET_STEPPER_STEP =  "GET_STEPPER_STEP";
-String SET_DC_MOTOR_L_SPEED = "SET_DC_MOTOR_L_SPEED";
-String GET_DC_MOTOR_L_SPEED =  "GET_DC_MOTOR_L_SPEED";
-String SET_DC_MOTOR_R_SPEED = "SET_DC_MOTOR_R_SPEED";
-String GET_DC_MOTOR_R_SPEED =  "GET_DC_MOTOR_R_SPEED";
 
 //初期化
 void AvatarTranstexhter_wire_core::init(){
@@ -30,257 +20,314 @@ void AvatarTranstexhter_wire_core::init(){
       core_wire->begin(DC_MOTOR_ADDRESS);
     break;
   }
-}
-
-//ステッピングモーター速度調整用コマンド(マスター側)
-boolean AvatarTranstexhter_wire_core::setStepperSpeed(long speed){
   if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return false;
+    core_wire->onRequest(slaveSentEvent);
   }
-  sent_wire(SET_STEPPER_SPEED, speed, STEPPER_ADDRESS);
-  return true;
 }
 
-//ステッピングモーター回転用コマンド(マスター側)
-boolean AvatarTranstexhter_wire_core::setStepperStep(long step){
-  if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return false;
-  }
-  sent_wire(SET_STEPPER_STEP, step, STEPPER_ADDRESS);
-  return true;
-}
-
-//ステッピングモーターの設定速度を取得するコマンド(マスター側)
-long AvatarTranstexhter_wire_core::getStepperSpeed(int timeout){
-  long value = 0;
-  if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return 0;
-  }
-  sent_wire(GET_STEPPER_SPEED, 0, STEPPER_ADDRESS);
-  delay(10);
-  core_wire->requestFrom(STEPPER_ADDRESS, 32);
-  if(timeout != 0){
-    long start = millis();
-    while(timeout >= (millis() - start) && core_wire->available() == 0);
-  }
-  if(core_wire->available() == 0){
-    return 0;
-  }else{
-    String cmd;
-    split_cmd_value(&cmd, &value);
-    return value;
-  }
-  return 0;
-}
-
-//ステッピングモーターの回転角を取得するコマンド(マスター側)
-long AvatarTranstexhter_wire_core::getStepperStep(int timeout){
-  long value = 0;
-  if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return 0;
-  }
-  sent_wire(GET_STEPPER_STEP, 0, STEPPER_ADDRESS);
-  delay(10);
-  core_wire->requestFrom(STEPPER_ADDRESS, 32);
-  if(timeout != 0){
-    long start = millis();
-    while(timeout >= (millis() - start) && core_wire->available() == 0);
-  }
-  if(core_wire->available() == 0){
-    return 0;
-  }else{
-    String cmd;
-    split_cmd_value(&cmd, &value);
-    return value;
-  }
-  return 0;
-}
-
-//ステッピングモーター制御用デバイス受信コマンド(スレーブ側)
-boolean AvatarTranstexhter_wire_core::receiveStepperModule(String* cmd, long* value){ 
-  if(core_role != STEPPER_MODULE){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return false;
-  }
-  return split_cmd_value(cmd, value);
-}
-
-//スレーブ側からステッピングモーターの情報を送信(スレーブ側)
-boolean AvatarTranstexhter_wire_core::sentInfoStpper(long value){
-  sent_wire("", value);
-  if(enable_serial == true){
-    Serial.println("Send wire");
-    Serial.print("value: ");
-    Serial.println(value);
-  }
-  return true;
-}
-
-//DCモーター速度調整用コマンド(マスター側)
-boolean AvatarTranstexhter_wire_core::setDcMotorLSpeed(long speed){
-  if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return false;
-  }
-  sent_wire(SET_DC_MOTOR_L_SPEED, speed, DC_MOTOR_ADDRESS);
-  return true;
-}
-
-//DCモーターの設定速度を取得するコマンド(マスター側)
-long AvatarTranstexhter_wire_core::getDcMotorLSpeed(int timeout){
-  long value = 0;
-  if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return 0;
-  }
-  sent_wire(GET_DC_MOTOR_L_SPEED, 0, DC_MOTOR_ADDRESS);
-  delay(10);
-  core_wire->requestFrom(DC_MOTOR_ADDRESS, 32);
-  if(timeout != 0){
-    long start = millis();
-    while(timeout >= (millis() - start) && core_wire->available() == 0);
-  }
-  if(core_wire->available() == 0){
-    return 0;
-  }else{
-    String cmd;
-    split_cmd_value(&cmd, &value);
-    return value;
-  }
-  return 0;
-}
-
-//DCモーター速度調整用コマンド(マスター側)
-boolean AvatarTranstexhter_wire_core::setDcMotorRSpeed(long speed){
-  if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return false;
-  }
-  sent_wire(SET_DC_MOTOR_R_SPEED, speed, DC_MOTOR_ADDRESS);
-  return true;
-}
-
-//DCモーターの設定速度を取得するコマンド(マスター側)
-long AvatarTranstexhter_wire_core::getDcMotorRSpeed(int timeout){
-  long value = 0;
-  if(core_role != MASTER){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return 0;
-  }
-  sent_wire(GET_DC_MOTOR_R_SPEED, 0, DC_MOTOR_ADDRESS);
-  delay(10);
-  core_wire->requestFrom(DC_MOTOR_ADDRESS, 32);
-  if(timeout != 0){
-    long start = millis();
-    while(timeout >= (millis() - start) && core_wire->available() == 0);
-  }
-  if(core_wire->available() == 0){
-    return 0;
-  }else{
-    String cmd;
-    split_cmd_value(&cmd, &value);
-    return value;
-  }
-  return 0;
-}
-
-//DCモーター制御用デバイス受信コマンド(スレーブ側)
-boolean AvatarTranstexhter_wire_core::receiveDcMotorModule(String* cmd, long* value){ 
-  if(core_role != DC_MOTOR_MODULE){
-    if(enable_serial == true){
-      Serial.println("This function is not available for this device role.");
-    }
-    return false;
-  }
-  return split_cmd_value(cmd, value);
-}
-
-//スレーブ側からDCモーターの情報を送信(スレーブ側)
-boolean AvatarTranstexhter_wire_core::sentInfoDcMotor(long value){
-  return AvatarTranstexhter_wire_core::sentInfoStpper(value);
-}
-
+// I2C経由でコマンドを送信するメソッド 
 //cmdとvalueを定めたルールに則って文字列にし、送信する
-void AvatarTranstexhter_wire_core::sent_wire(String cmd, long value, byte address){
-  String sentCmd = "cmd:" + cmd + ":value:" + String(value) + ";"; 
-  if(enable_serial == true){
-    Serial.println(address);
-    Serial.println(sentCmd);
+void AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value){
+  static int16_t maxValue = INT16_MAX - INT8_MAX;
+  if(value > maxValue){
+    value = maxValue;
   }
-  if(address == 0){
-    core_wire->write(sentCmd.c_str());
-    //core_wire->endTransmission();
-  }else{
+  int8_t cmd = (int8_t)command;
+  int16_t val = (int16_t)value;
+  int16_t sum = (int16_t)cmd + (int16_t)val;
+
+  int tryTimes = 0;
+  // LIMIT＿TRY＿TIMES回送信を施行する
+  while (tryTimes < LIMIT_TRY_TIMES) {
     core_wire->beginTransmission(address);
-    core_wire->write(sentCmd.c_str());
+    // コマンド送信(1バイト)
+    core_wire->write((uint8_t*)&cmd, sizeof(cmd));
+    // 値送信（２バイト）
+    core_wire->write((uint8_t*)&val, sizeof(val));
+    // テェックサム（コマンド＋値）送信（２バイト）
+    core_wire->write((uint8_t*)&sum, sizeof(sum));
     core_wire->endTransmission();
+    // 返信要求（１バイト）
+    core_wire->requestFrom(address, 1);
+    unsigned long nowTime = millis();
+    // LIMIT_WAIT_TIME未満待機する
+    while(core_wire->available() <= 0 && (millis() - nowTime) < LIMIT_WAIT_TIME){
+      delay(RESEND_TIME);
+    }
+    if((millis() - nowTime) >= LIMIT_WAIT_TIME){
+      // LIMIT_WAIT_TIME以上返信が返らない場合は処理を終了する
+      return;
+    }
+    byte result = core_wire->read();
+    if(result == (byte)SUCCESS){
+      // SUCCESSが返ってきたら処理を終了する
+      return;
+    }else{
+      tryTimes++;
+    }
+  }
+}
+//スレーブ送信用イベント
+void AvatarTranstexhter_wire_core::slaveSentEvent(){
+  switch (resultStatus) {
+    // 代入した受信結果の送信
+    case RESULT_SENT:
+      core_wire->write((byte)wire_result);
+      wire_result = FAILURE;
+      break;
+    // 要求があった値の送信
+    case VALUE_SENT:
+      int8_t cmd = (int8_t)sentCmd;
+      int16_t val = (int16_t)sentValue;
+      int16_t sum = (int16_t)cmd + (int16_t)val;
+      // コマンド送信(1バイト)
+      core_wire->write((uint8_t*)&cmd, sizeof(cmd));
+      // 値送信（２バイト）
+      core_wire->write((uint8_t*)&val, sizeof(val));
+      // テェックサム（コマンド＋値）送信（２バイト）
+      core_wire->write((uint8_t*)&sum, sizeof(sum));
+      // 受信結果の送信状態へ戻す
+      wire_result = SUCCESS;
+      resultStatus = RESULT_SENT;
+      break;
+    // default:
+      // break;
   }
 }
 
-//文字列からcmdとvalueをそれぞれ分解する
-boolean AvatarTranstexhter_wire_core::split_cmd_value(String* cmd, long* value){
-  if(core_wire->available() != 0){
-    String sentCmd = "";
-    boolean over = false;
-    while (core_wire->available() > 0) {
-      char c = core_wire->read();
-      if(c == ';'){
-        over = true;
+//受信したcmdとvalueを格納する
+bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
+  int8_t cmd;
+  int16_t val, sum;
+  int8_t* data;
+  int tryTimes = 0;
+  while (tryTimes < LIMIT_TRY_TIMES) {
+    if(core_wire->available() >= INFO_SIZE){
+      // コマンド受信（１バイト）
+      cmd = core_wire->read();
+      // 値受信（2バイト）
+      data = (int8_t*)&val;
+      for(int i = 0;i < sizeof(val) && core_wire->available();i++){
+        data[i] = core_wire->read();
       }
-      if(over == false){
-        sentCmd += c;
+      // チェックサム受信(2バイト)
+      data = NULL;
+      data = (int8_t*)&sum;
+      for(int i = 0;i < sizeof(sum) && core_wire->available();i++){
+        data[i] = core_wire->read();
       }
-    }
-    if(enable_serial == true){
-      Serial.println(sentCmd);
-    }
-    int colon[3];
-    int colonIndex = 0;
-    if(sentCmd.indexOf("cmd:") >= 0){
-      char charCmd[sentCmd.length()];
-      sentCmd.toCharArray(charCmd, sentCmd.length());
-      for(int i = 0;i<sentCmd.length();i++){
-        if(charCmd[i] == ':'){
-          colon[colonIndex] = i;
-          colonIndex++; 
-        }
+      // 代入
+      *command = (int)cmd;
+      *value = (int)val;
+      if(core_serial_speed <= 0){
+        Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
       }
-      if(enable_serial == true){
-        Serial.println(sentCmd);
-      }
-      if(colon[2] != 0){
-        *cmd = sentCmd.substring(colon[0] + 1, colon[1]);
-        *value = sentCmd.substring(colon[2] + 1, sentCmd.length()).toInt();
-        return true;
+      // 受信結果代入
+      if(sum != cmd + val){
+        wire_result = FAILURE;
       }else{
-        return false;
+        wire_result = SUCCESS;
+        return true;
       }
+      tryTimes++;
     }
-    else{
-      return false;
+  }
+  return false;
+}
+
+// ステッピングモーター
+// ステッピングモーター設定用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setStepperInfo(int speed, int step){
+  sent_wire(STEPPER_ADDRESS, SET_STEPPER_SPEED, speed);
+  sent_wire(STEPPER_ADDRESS, SET_STEPPER_STEP, step);
+}
+// ステッピングモーターの設定を取得するメソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getStepperInfo(int* speed, int* step){
+  // 回転速度の取得
+  sent_wire(STEPPER_ADDRESS, GET_STEPPER_SPEED, 0);
+  int command;
+  int count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+    receive_read(&command, speed);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  // 回転角度の取得
+  sent_wire(STEPPER_ADDRESS, GET_STEPPER_STEP, 0);
+  count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+    receive_read(&command, step);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  return true;
+}
+// マスター側から通信を受け取るメソッド(スレーブ側)
+bool AvatarTranstexhterStepperSlave::receiveStepperInfo(){
+  int command;
+  int value;
+  if(wireCore.receive_read(&command, &value)){
+    switch (command) {
+      case SET_STEPPER_SPEED:
+        speed = value;
+      break;
+      case SET_STEPPER_STEP:
+        step = value;
+      break;
+      case GET_STEPPER_SPEED:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_STEPPER_SPEED);
+        wireCore.setSentValue(speed);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+      case GET_STEPPER_STEP:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_STEPPER_STEP);
+        wireCore.setSentValue(step);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
     }
+    return true;
+  }else{
+    return false;
+  }
+}
+
+// DCモーター
+// DCモーターの速度調整用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setDcMotor(int speed_l, int speed_r){
+  sent_wire(DC_MOTOR_ADDRESS, SET_DC_MOTOR_SPEED_L, speed_l);
+  sent_wire(DC_MOTOR_ADDRESS, SET_DC_MOTOR_SPEED_R, speed_r);
+}
+// DCモーターの設定速度を取得するメソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
+  // 左モータの回転速度の取得
+  sent_wire(DC_MOTOR_ADDRESS, GET_DC_MOTOR_SPEED_L, 0);
+  int command;
+  int count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(DC_MOTOR_ADDRESS, INFO_SIZE);
+    receive_read(&command, speed_l);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  // 右モータの回転速度の取得
+  sent_wire(STEPPER_ADDRESS, GET_DC_MOTOR_SPEED_R, 0);
+  count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(DC_MOTOR_ADDRESS, INFO_SIZE);
+    receive_read(&command, speed_r);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  return true;
+}
+// マスター側から通信を受け取るメソッド(スレーブ側)
+bool AvatarTranstexhterDcMotorSlave::receiveDcMotorInfo(){
+  int command;
+  int value;
+  if(wireCore.receive_read(&command, &value)){
+    switch (command) {
+      case SET_DC_MOTOR_SPEED_L:
+        speed_L = value;
+      break;
+      case SET_DC_MOTOR_SPEED_R:
+        speed_R = value;
+      break;
+      case GET_DC_MOTOR_SPEED_L:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_DC_MOTOR_SPEED_L);
+        wireCore.setSentValue(speed_L);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+      case GET_DC_MOTOR_SPEED_R:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_DC_MOTOR_SPEED_R);
+        wireCore.setSentValue(speed_R);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+    }
+    return true;
+  }else{
+    return false;
+  }
+}
+
+// フロントディスプレイ
+// フロントディスプレイ設定用メソッド（マスター側）
+void AvatarTranstexhter_wire_core::setFrontDisplay(int imageType, int loopTime){
+  sent_wire(MOUTH_ADDRESS, SET_MOUTH_IMAGE_TYPE, imageType);
+  sent_wire(MOUTH_ADDRESS, SET_MOUTH_LOOP_TIME, loopTime);
+}
+// フロントディスプレイの設定を取得するメソッド（マスター側）
+bool AvatarTranstexhter_wire_core::getFrontDisplay(int* imageType, int* loopTime){
+  // 画像種類の取得
+  sent_wire(MOUTH_ADDRESS, GET_MOUTH_IMAGE_TYPE, 0);
+  int command;
+  int count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(MOUTH_ADDRESS, INFO_SIZE);
+    receive_read(&command, imageType);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  // 周期時間の取得
+  sent_wire(MOUTH_ADDRESS, GET_MOUTH_LOOP_TIME, 0);
+  count = 0;
+  do{// 正しい値が来るまで繰り返す
+    delay(SWITCH_RECEVE);
+    core_wire->requestFrom(MOUTH_ADDRESS, INFO_SIZE);
+    receive_read(&command, loopTime);
+    count++;
+  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  if(wire_result == FAILURE){
+    return false;
+  }
+  return true;
+}
+// マスター側から通信を受け取るメソッド(スレーブ側)
+bool AvatarTranstexhterMouthSlave::receiveMouthInfo(){
+  int command;
+  int value;
+  if(wireCore.receive_read(&command, &value)){
+    switch (command) {
+      case SET_MOUTH_IMAGE_TYPE:
+        imageType = value;
+      break;
+      case SET_MOUTH_LOOP_TIME:
+        loopTime = value;
+      break;
+      case GET_MOUTH_IMAGE_TYPE:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_MOUTH_IMAGE_TYPE);
+        wireCore.setSentValue(imageType);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+      case GET_MOUTH_LOOP_TIME:
+        delay(SWITCH_RECEVE);
+        wireCore.setSentCmd(GET_MOUTH_LOOP_TIME);
+        wireCore.setSentValue(loopTime);
+        wireCore.setResultStatus(VALUE_SENT);
+      break;
+    }
+    return true;
   }else{
     return false;
   }
