@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <sys/_stdint.h>
+#include <ArrayQueueStack.h>
 
 //デバイスのI2Cアドレス
 #define MOUTH_ADDRESS 0x37
@@ -57,8 +58,12 @@ class AvatarTranstexhter_wire_core{
     inline static result_status resultStatus = RESULT_SENT;
     inline static byte sentCmd = 0;
     inline static int sentValue = 0;
+    inline static uint8_t readDatas[INFO_SIZE];
+    inline static ArrayFIFO<uint8_t> receiveBuff = ArrayFIFO<uint8_t>(INFO_SIZE);
     // スレーブ送信用イベント
     static void slaveSentEvent();
+    // スレーブ受信用イベント
+    static void slaveReceiveEvent(int receiveByte);
     
   public:
     AvatarTranstexhter_wire_core(TwoWire* wire, int serial_speed = 0, role_module role = MASTER){

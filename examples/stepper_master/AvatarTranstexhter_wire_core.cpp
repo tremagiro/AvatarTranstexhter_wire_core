@@ -22,6 +22,7 @@ void AvatarTranstexhter_wire_core::init(){
   }
   if(core_role != MASTER){
     core_wire->onRequest(slaveSentEvent);
+    core_wire->onReceive(slaveReceiveEvent);
   }
 }
 
@@ -95,6 +96,20 @@ void AvatarTranstexhter_wire_core::slaveSentEvent(){
   }
 }
 
+// スレーブ受信用イベント
+void AvatarTranstexhter_wire_core::slaveReceiveEvent(int receiveByte){
+  if(core_wire->available() >= INFO_SIZE){
+    // 保存値をリセット
+    while (receiveBuff.available()) {
+      receiveBuff.pop();
+    }
+    for(int i = 0; i < INFO_SIZE; i++){
+      // 受信値を保存
+      receiveBuff.push(core_wire->read());
+    }
+  }
+}
+
 //受信したcmdとvalueを格納する
 bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
   int8_t cmd;
@@ -102,19 +117,19 @@ bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
   int8_t* data;
   int tryTimes = 0;
   while (tryTimes < LIMIT_TRY_TIMES) {
-    if(core_wire->available() >= INFO_SIZE){
+    if(receiveBuff.available() >= INFO_SIZE){
       // コマンド受信（１バイト）
-      cmd = core_wire->read();
+      cmd = receiveBuff.pop();
       // 値受信（2バイト）
       data = (int8_t*)&val;
-      for(int i = 0;i < sizeof(val) && core_wire->available();i++){
-        data[i] = core_wire->read();
+      for(int i = 0;i < sizeof(val);i++){
+        data[i] = receiveBuff.pop();
       }
       // チェックサム受信(2バイト)
       data = NULL;
       data = (int8_t*)&sum;
-      for(int i = 0;i < sizeof(sum) && core_wire->available();i++){
-        data[i] = core_wire->read();
+      for(int i = 0;i < sizeof(sum);i++){
+        data[i] = receiveBuff.pop();
       }
       // 代入
       *command = (int)cmd;
