@@ -130,6 +130,9 @@ bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
         return true;
       }
       tryTimes++;
+    }else{
+      delay(10);
+      tryTimes++;
     }
   }
   return false;
