@@ -1,4 +1,4 @@
-#include <AvatarTranstexhter_wire_core.h>
+#include "AvatarTranstexhter_wire_core.h"
 
 AvatarTranstexhterStepperSlave myStepper = AvatarTranstexhterStepperSlave(&Wire, 115200);
 
