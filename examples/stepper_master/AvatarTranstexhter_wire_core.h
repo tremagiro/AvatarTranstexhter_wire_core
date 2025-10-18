@@ -55,7 +55,7 @@ class AvatarTranstexhter_wire_core{
     bool enable_serial = false;
     inline static wire_result_enum wire_result = FAILURE;
     inline static result_status resultStatus = RESULT_SENT;
-    inline static byte sentCmd = 0;
+    inline static int sentCmd = 0;
     inline static int sentValue = 0;
     inline static uint8_t readDatas[INFO_SIZE];
     inline static bool updateReceive = false;
@@ -64,6 +64,8 @@ class AvatarTranstexhter_wire_core{
     inline static int16_t receiveSum;
     // スレーブ送信用イベント
     static void slaveSentEvent();
+    static void sent(int command, int value);
+    static bool receive(int* command, int* value);
   public:
     // I2Cインスタンス
     inline static TwoWire* core_wire = nullptr;
