@@ -1,5 +1,8 @@
 #include "AvatarTranstexhter_wire_core.h"
 
+AvatarTranstexhterStepperSlave* AvatarTranstexhterStepperSlave::wireCoreInstance = nullptr;
+
+
 //初期化
 void AvatarTranstexhter_wire_core::init(){
   if(core_serial_speed > 0){
@@ -22,7 +25,7 @@ void AvatarTranstexhter_wire_core::init(){
   }
   if(core_role != MASTER){
     core_wire->onRequest(slaveSentEvent);
-    core_wire->onReceive(slaveReceiveEvent);
+    // core_wire->onReceive(slaveReceiveEvent);
   }
 }
 
@@ -97,20 +100,40 @@ void AvatarTranstexhter_wire_core::slaveSentEvent(){
 }
 
 // スレーブ受信用イベント
-void AvatarTranstexhter_wire_core::slaveReceiveEvent(int receiveByte){
-  Serial.printf("Receive byte : %d \n", receiveByte);
-  if(receiveByte >= INFO_SIZE){
-    // 保存値をリセット
-    while (receiveBuff.available()) {
-      receiveBuff.pop();
+bool AvatarTranstexhter_wire_core::slaveReceiveEvent(int* command, int* value){
+  int8_t cmd;
+  int16_t val, sum;
+  int8_t* data;
+  if(core_wire->available() >= INFO_SIZE){
+    // コマンド受信（１バイト）
+    cmd = core_wire->read();
+    // 値受信（2バイト）
+    data = (int8_t*)&val;
+    for(int i = 0;i < sizeof(val) && core_wire->available();i++){
+      data[i] = core_wire->read();
     }
-    for(int i = 0; i < INFO_SIZE; i++){
-      // 受信値を保存
-      receiveBuff.push(core_wire->read());
-      Serial.println(i);
+    // チェックサム受信(2バイト)
+    data = NULL;
+    data = (int8_t*)&sum;
+    for(int i = 0;i < sizeof(sum) && core_wire->available();i++){
+      data[i] = core_wire->read();
     }
+    // 代入
+    *command = (int)cmd;
+    *value = (int)val;
+    // if(core_serial_speed <= 0){
+    //   Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
+    // }
+    // 受信結果代入
+    if(sum != cmd + val){
+      wire_result = FAILURE;
+    }else{
+      wire_result = SUCCESS;
+    }
+    return true; 
+  }else{
+    return false;
   }
-  Serial.printf("Save byte : %d \n", receiveBuff.available());
 }
 
 //受信したcmdとvalueを格納する
@@ -120,20 +143,15 @@ bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
   int8_t* data;
   int tryTimes = 0;
   while (tryTimes < LIMIT_TRY_TIMES) {
-    if(receiveBuff.available() >= INFO_SIZE){
+    if(updateReceive == true){
       // コマンド受信（１バイト）
-      cmd = receiveBuff.pop();
+      cmd = receiveCmd;
       // 値受信（2バイト）
-      data = (int8_t*)&val;
-      for(int i = 0;i < sizeof(val);i++){
-        data[i] = receiveBuff.pop();
-      }
+      val = receiveVal;
       // チェックサム受信(2バイト)
-      data = NULL;
-      data = (int8_t*)&sum;
-      for(int i = 0;i < sizeof(sum);i++){
-        data[i] = receiveBuff.pop();
-      }
+      sum = receiveSum;
+      // 読取済み
+      updateReceive = false;
       // 代入
       *command = (int)cmd;
       *value = (int)val;
@@ -192,45 +210,47 @@ bool AvatarTranstexhter_wire_core::getStepperInfo(int* speed, int* step){
   return true;
 }
 // マスター側から通信を受け取るメソッド(スレーブ側)
-bool AvatarTranstexhterStepperSlave::receiveStepperInfo(){
+void AvatarTranstexhterStepperSlave::receiveStepperInfo(int receiveByte){
   int command;
   int value;
-  if(wireCore.receive_read(&command, &value)){
+  // I2C受信
+  // updateInfo = wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value);
+  // 受信後の処理
+  if(wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value)){
     switch (command) {
       case SET_STEPPER_SPEED:
         speed = value;
+        updateInfo = true;
       break;
       case SET_STEPPER_STEP:
         step = value;
+        updateInfo = true;
       break;
       case GET_STEPPER_SPEED:
         delay(SWITCH_RECEVE);
-        wireCore.setSentCmd(GET_STEPPER_SPEED);
-        wireCore.setSentValue(speed);
-        wireCore.setResultStatus(VALUE_SENT);
+        wireCoreInstance->wireCore.setSentCmd(GET_STEPPER_SPEED);
+        wireCoreInstance->wireCore.setSentValue(speed);
+        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
       case GET_STEPPER_STEP:
         delay(SWITCH_RECEVE);
-        wireCore.setSentCmd(GET_STEPPER_STEP);
-        wireCore.setSentValue(step);
-        wireCore.setResultStatus(VALUE_SENT);
+        wireCoreInstance->wireCore.setSentCmd(GET_STEPPER_STEP);
+        wireCoreInstance->wireCore.setSentValue(step);
+        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
     }
-    return true;
-  }else{
-    return false;
   }
 }
 
 // DCモーター
-// DCモーターの速度調整用メソッド(マスター側)
-void AvatarTranstexhter_wire_core::setDcMotor(int speed_l, int speed_r){
+// DCモーター設定用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setDcMotorInfo(int speed_l, int speed_r){
   sent_wire(DC_MOTOR_ADDRESS, SET_DC_MOTOR_SPEED_L, speed_l);
   sent_wire(DC_MOTOR_ADDRESS, SET_DC_MOTOR_SPEED_R, speed_r);
 }
-// DCモーターの設定速度を取得するメソッド(マスター側)
-bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
-  // 左モータの回転速度の取得
+// DCモーターの設定を取得するメソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getDcMotorInfo(int* speed_l, int* speed_r){
+  // 左回転速度の取得
   sent_wire(DC_MOTOR_ADDRESS, GET_DC_MOTOR_SPEED_L, 0);
   int command;
   int count = 0;
@@ -243,7 +263,7 @@ bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
   if(wire_result == FAILURE){
     return false;
   }
-  // 右モータの回転速度の取得
+  // 右回転速度の取得
   sent_wire(DC_MOTOR_ADDRESS, GET_DC_MOTOR_SPEED_R, 0);
   count = 0;
   do{// 正しい値が来るまで繰り返す
@@ -258,44 +278,46 @@ bool AvatarTranstexhter_wire_core::getDcMotor(int* speed_l, int* speed_r){
   return true;
 }
 // マスター側から通信を受け取るメソッド(スレーブ側)
-bool AvatarTranstexhterDcMotorSlave::receiveDcMotorInfo(){
+void AvatarTranstexhterDcMotorSlave::receiveDcMotorInfo(int receiveByte){
   int command;
   int value;
-  if(wireCore.receive_read(&command, &value)){
+  // I2C受信
+  // updateInfo = wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value);
+  // 受信後の処理
+  if(wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value)){
     switch (command) {
       case SET_DC_MOTOR_SPEED_L:
         speed_L = value;
+        updateInfo = true;
       break;
       case SET_DC_MOTOR_SPEED_R:
         speed_R = value;
+        updateInfo = true;
       break;
       case GET_DC_MOTOR_SPEED_L:
         delay(SWITCH_RECEVE);
-        wireCore.setSentCmd(GET_DC_MOTOR_SPEED_L);
-        wireCore.setSentValue(speed_L);
-        wireCore.setResultStatus(VALUE_SENT);
+        wireCoreInstance->wireCore.setSentCmd(GET_DC_MOTOR_SPEED_L);
+        wireCoreInstance->wireCore.setSentValue(speed_L);
+        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
       case GET_DC_MOTOR_SPEED_R:
         delay(SWITCH_RECEVE);
-        wireCore.setSentCmd(GET_DC_MOTOR_SPEED_R);
-        wireCore.setSentValue(speed_R);
-        wireCore.setResultStatus(VALUE_SENT);
+        wireCoreInstance->wireCore.setSentCmd(GET_DC_MOTOR_SPEED_R);
+        wireCoreInstance->wireCore.setSentValue(speed_R);
+        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
     }
-    return true;
-  }else{
-    return false;
   }
 }
 
-// フロントディスプレイ
-// フロントディスプレイ設定用メソッド（マスター側）
-void AvatarTranstexhter_wire_core::setFrontDisplay(int imageType, int loopTime){
+// マウスモジュール
+// マウスモジュール設定用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setFrontDisplayInfo(int imageType, int loopTime){
   sent_wire(MOUTH_ADDRESS, SET_MOUTH_IMAGE_TYPE, imageType);
   sent_wire(MOUTH_ADDRESS, SET_MOUTH_LOOP_TIME, loopTime);
 }
-// フロントディスプレイの設定を取得するメソッド（マスター側）
-bool AvatarTranstexhter_wire_core::getFrontDisplay(int* imageType, int* loopTime){
+// DCモーターの設定を取得するメソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getFrontDisplayInfo(int *imageType, int *loopTime){
   // 画像種類の取得
   sent_wire(MOUTH_ADDRESS, GET_MOUTH_IMAGE_TYPE, 0);
   int command;
@@ -324,32 +346,34 @@ bool AvatarTranstexhter_wire_core::getFrontDisplay(int* imageType, int* loopTime
   return true;
 }
 // マスター側から通信を受け取るメソッド(スレーブ側)
-bool AvatarTranstexhterMouthSlave::receiveMouthInfo(){
+void AvatarTranstexhterMouthSlave::receiveMouthInfo(int receiveByte){
   int command;
   int value;
-  if(wireCore.receive_read(&command, &value)){
+  // I2C受信
+  // updateInfo = wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value);
+  // 受信後の処理
+  if(wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value)){
     switch (command) {
       case SET_MOUTH_IMAGE_TYPE:
         imageType = value;
+        updateInfo = true;
       break;
       case SET_MOUTH_LOOP_TIME:
         loopTime = value;
+        updateInfo = true;
       break;
       case GET_MOUTH_IMAGE_TYPE:
         delay(SWITCH_RECEVE);
-        wireCore.setSentCmd(GET_MOUTH_IMAGE_TYPE);
-        wireCore.setSentValue(imageType);
-        wireCore.setResultStatus(VALUE_SENT);
+        wireCoreInstance->wireCore.setSentCmd(GET_MOUTH_IMAGE_TYPE);
+        wireCoreInstance->wireCore.setSentValue(imageType);
+        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
       case GET_MOUTH_LOOP_TIME:
         delay(SWITCH_RECEVE);
-        wireCore.setSentCmd(GET_MOUTH_LOOP_TIME);
-        wireCore.setSentValue(loopTime);
-        wireCore.setResultStatus(VALUE_SENT);
+        wireCoreInstance->wireCore.setSentCmd(GET_MOUTH_LOOP_TIME);
+        wireCoreInstance->wireCore.setSentValue(loopTime);
+        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
     }
-    return true;
-  }else{
-    return false;
   }
 }

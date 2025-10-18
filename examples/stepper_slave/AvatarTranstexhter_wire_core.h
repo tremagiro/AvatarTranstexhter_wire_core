@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <sys/_stdint.h>
-#include <ArrayQueueStack.h>
 
 //デバイスのI2Cアドレス
 #define MOUTH_ADDRESS 0x37
@@ -50,7 +49,7 @@ enum result_status{
 
 class AvatarTranstexhter_wire_core{
   private:
-    inline static TwoWire* core_wire = nullptr;
+    // inline static TwoWire* core_wire = nullptr;
     role_module core_role;
     int core_serial_speed;
     bool enable_serial = false;
@@ -59,13 +58,15 @@ class AvatarTranstexhter_wire_core{
     inline static byte sentCmd = 0;
     inline static int sentValue = 0;
     inline static uint8_t readDatas[INFO_SIZE];
-    inline static ArrayFIFO<uint8_t> receiveBuff = ArrayFIFO<uint8_t>(INFO_SIZE);
+    inline static bool updateReceive = false;
+    inline static int8_t receiveCmd;
+    inline static int16_t receiveVal; 
+    inline static int16_t receiveSum;
     // スレーブ送信用イベント
     static void slaveSentEvent();
-    // スレーブ受信用イベント
-    static void slaveReceiveEvent(int receiveByte);
-    
   public:
+    // I2Cインスタンス
+    inline static TwoWire* core_wire = nullptr;
     AvatarTranstexhter_wire_core(TwoWire* wire, int serial_speed = 0, role_module role = MASTER){
       core_wire = wire;
       core_role = role;
@@ -87,91 +88,177 @@ class AvatarTranstexhter_wire_core{
     bool getStepperInfo(int* sp, int* st);
     // DCモーター
     // DCモーターの速度調整用メソッド(マスター側)
-    void setDcMotor(int speed_l, int speed_r);
+    void setDcMotorInfo(int speed_l, int speed_r);
     // DCモーターの設定速度を取得するメソッド(マスター側)
-    bool getDcMotor(int* speed_l, int* speed_r);
+    bool getDcMotorInfo(int* speed_l, int* speed_r);
     // フロントディスプレイ
     // フロントディスプレイ設定用メソッド（マスター側）
-    void setFrontDisplay(int imageType, int loopTime);
+    void setFrontDisplayInfo(int imageType, int loopTime);
     // フロントディスプレイの設定を取得するメソッド（マスター側）
-    bool getFrontDisplay(int* imageType, int* loopTime);
+    bool getFrontDisplayInfo(int* imageType, int* loopTime);
     // メンバ変数の値代入用メソッド
     void setSentCmd(byte cmd){sentCmd = cmd;}
     void setSentValue(int val){sentValue = val;}
     void setResultStatus(result_status status){resultStatus = status;}
+    // スレーブ受信用イベント
+    bool slaveReceiveEvent(int* command, int* value);
 };
 
 class AvatarTranstexhterStepperSlave{
   private:
-    int speed;
-    int step;
-    int tmpSpeed;
-    int tmpStep;
+    inline static int speed;
+    inline static int step;
+    inline static int tmpSpeed;
+    inline static int tmpStep;
+    inline static bool updateInfo;
     AvatarTranstexhter_wire_core wireCore;
+    static AvatarTranstexhterStepperSlave* wireCoreInstance;
+    // マスター側から通信を受け取るメソッド(スレーブ側)
+    static void receiveStepperInfo(int receiveByte);
   public:
     AvatarTranstexhterStepperSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, STEPPER_MODULE){
+      wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド
-    void setTmpSpeed(int sp){tmpSpeed = sp;}
-    int getTmpSpeed(){return tmpSpeed;}
-    void setTmpStep(int st){tmpStep = st;}
-    int getTmpStep(){return tmpStep;}
-    void setSpeed(int sp){speed = sp;}
-    int getSpeed(){return speed;}
-    void setStep(int st){step = st;}
-    int getStep(){return step;}
+    void setTmpSpeed(int sp){
+      tmpSpeed = sp;
+    }
+    int getTmpSpeed(){
+      return tmpSpeed;
+    }
+    void setTmpStep(int st){
+      tmpStep = st;
+    }
+    int getTmpStep(){
+      return tmpStep;
+    }
+    void setSpeed(int sp){
+      speed = sp;
+    }
+    int getSpeed(){
+      updateInfo = false;
+      return speed;
+    }
+    void setStep(int st){
+      step = st;
+    }
+    int getStep(){
+      updateInfo = false;
+      return step;
+    }
     // 初期化変数
-    void init(){wireCore.init();}
-    // マスター側から通信を受け取るメソッド(スレーブ側)
-    bool receiveStepperInfo();
+    void init(){
+      wireCore.init();
+      wireCore.core_wire->onReceive(receiveStepperInfo);
+    }
+    // I2Cから信号を受け取って一度も読み込まれていないか
+    bool updateStepper(){
+      return updateInfo;
+    }
 };
 
 class AvatarTranstexhterDcMotorSlave{
   private:
-    int speed_L;
-    int speed_R;
-    int tmpSpeed_L;
-    int tmpSpeed_R;
+    inline static int speed_L;
+    inline static int speed_R;
+    inline static int tmpSpeed_L;
+    inline static int tmpSpeed_R;
+    inline static bool updateInfo;
     AvatarTranstexhter_wire_core wireCore;
+    static AvatarTranstexhterDcMotorSlave* wireCoreInstance;
+    // マスター側から通信を受け取るメソッド(スレーブ側)
+    static void receiveDcMotorInfo(int receiveByte);
   public:
     AvatarTranstexhterDcMotorSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, DC_MOTOR_MODULE){
+      wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド
-    void setTmpSpeedL(int spL){tmpSpeed_L = spL;}
-    int getTmpSpeedL(){return tmpSpeed_L;}
-    void setTmpSpeedR(int spR){tmpSpeed_R = spR;}
-    int getTmpSpeedR(){return tmpSpeed_R;}
-    void setSpeedL(int spL){speed_L = spL;}
-    int getSpeedL(){return speed_L;}
-    void setSpeedR(int spR){speed_R = spR;}
-    int getSpeedR(){return speed_R;}
+    void setTmpSpeedL(int spl){
+      tmpSpeed_L = spl;
+    }
+    int getTmpSpeedL(){
+      return tmpSpeed_L;
+    }
+    void setTmpSpeedR(int spr){
+      tmpSpeed_R = spr;
+    }
+    int getTmpSpeedR(){
+      return tmpSpeed_R;
+    }
+    void setSpeedL(int spl){
+      speed_L = spl;
+    }
+    int getSpeedL(){
+      updateInfo = false;
+      return speed_L;
+    }
+    void setSpeedR(int spr){
+      speed_R = spr;
+    }
+    int getSpeedR(){
+      updateInfo = false;
+      return speed_R;
+    }
     // 初期化変数
-    void init(){wireCore.init();}
-    // マスター側から通信を受け取るメソッド(スレーブ側)
-    bool receiveDcMotorInfo();
+    void init(){
+      wireCore.init();
+      wireCore.core_wire->onReceive(receiveDcMotorInfo);
+    }
+    // I2Cから信号を受け取って一度も読み込まれていないか
+    bool updateStepper(){
+      return updateInfo;
+    }
 };
 
 class AvatarTranstexhterMouthSlave{
   private:
-    int imageType;
-    int loopTime;
-    int tmpImageType;
-    int tmpLoopTime;
+    inline static int imageType;
+    inline static int loopTime;
+    inline static int tmpImageType;
+    inline static int tmpLoopTime;
+    inline static bool updateInfo;
     AvatarTranstexhter_wire_core wireCore;
+    static AvatarTranstexhterMouthSlave* wireCoreInstance;
+    // マスター側から通信を受け取るメソッド(スレーブ側)
+    static void receiveMouthInfo(int receiveByte);
   public:
     AvatarTranstexhterMouthSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, MOUTH_MODULE){
+      wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド
-    void setTmpImageType(int it){tmpImageType = it;}
-    int getTmpImageType(){return tmpImageType;}
-    void setTmpLoopTime(int lt){tmpLoopTime = lt;}
-    int getTmpLoopTime(){return tmpLoopTime;}
-    void setImageType(int it){imageType = it;}
-    int getImageType(){return imageType;}
-    void setLoopTime(int lt){loopTime = lt;}
-    int getLoopTime(){return loopTime;}
+    void setTmpImageType(int it){
+      tmpImageType = it;
+    }
+    int getTmpImageType(){
+      return tmpImageType;
+    }
+    void setTmpLoopTime(int lt){
+      tmpLoopTime = lt;
+    }
+    int getTmpLoopTime(){
+      return tmpLoopTime;
+    }
+    void setImageType(int it){
+      imageType = it;
+    }
+    int getImageType(){
+      updateInfo = false;
+      return imageType;
+    }
+    void setLoopTime(int lt){
+      loopTime = lt;
+    }
+    int getLoopTime(){
+      updateInfo = false;
+      return loopTime;
+    }
     // 初期化変数
-    void init(){wireCore.init();}
-    // マスター側から通信を受け取るメソッド(スレーブ側)
-    bool receiveMouthInfo();
+    void init(){
+      wireCore.init();
+      wireCore.core_wire->onReceive(receiveMouthInfo);
+    }
+    // I2Cから信号を受け取って一度も読み込まれていないか
+    bool updateStepper(){
+      return updateInfo;
+    }
 };
