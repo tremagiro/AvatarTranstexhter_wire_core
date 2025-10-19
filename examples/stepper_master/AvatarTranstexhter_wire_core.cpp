@@ -35,41 +35,44 @@ void AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value
   if(value > maxValue){
     value = maxValue;
   }
+  core_wire->beginTransmission(address);
+  sent(command, value);
+  core_wire->endTransmission();
   // int8_t cmd = (int8_t)command;
   // int16_t val = (int16_t)value;
   // int16_t sum = (int16_t)cmd + (int16_t)val;
 
-  int tryTimes = 0;
-  // LIMIT＿TRY＿TIMES回送信を施行する
-  while (tryTimes < LIMIT_TRY_TIMES) {
-    core_wire->beginTransmission(address);
-    // // コマンド送信(1バイト)
-    // core_wire->write((uint8_t*)&cmd, sizeof(cmd));
-    // // 値送信（２バイト）
-    // core_wire->write((uint8_t*)&val, sizeof(val));
-    // // テェックサム（コマンド＋値）送信（２バイト）
-    // core_wire->write((uint8_t*)&sum, sizeof(sum));
-    sent(command, value);
-    core_wire->endTransmission();
-    // 返信要求（１バイト）
-    core_wire->requestFrom(address, 1);
-    unsigned long nowTime = millis();
-    // LIMIT_WAIT_TIME未満待機する
-    while(core_wire->available() <= 0 && (millis() - nowTime) < LIMIT_WAIT_TIME){
-      delay(RESEND_TIME);
-    }
-    if((millis() - nowTime) >= LIMIT_WAIT_TIME){
-      // LIMIT_WAIT_TIME以上返信が返らない場合は処理を終了する
-      return;
-    }
-    byte result = core_wire->read();
-    if(result == (byte)SUCCESS){
-      // SUCCESSが返ってきたら処理を終了する
-      return;
-    }else{
-      tryTimes++;
-    }
-  }
+  // int tryTimes = 0;
+  // // LIMIT＿TRY＿TIMES回送信を施行する
+  // while (tryTimes < LIMIT_TRY_TIMES) {
+  //   core_wire->beginTransmission(address);
+  //   // // コマンド送信(1バイト)
+  //   // core_wire->write((uint8_t*)&cmd, sizeof(cmd));
+  //   // // 値送信（２バイト）
+  //   // core_wire->write((uint8_t*)&val, sizeof(val));
+  //   // // テェックサム（コマンド＋値）送信（２バイト）
+  //   // core_wire->write((uint8_t*)&sum, sizeof(sum));
+  //   sent(command, value);
+  //   core_wire->endTransmission();
+  //   // 返信要求（１バイト）
+  //   core_wire->requestFrom(address, 1);
+  //   unsigned long nowTime = millis();
+  //   // LIMIT_WAIT_TIME未満待機する
+  //   while(core_wire->available() <= 0 && (millis() - nowTime) < LIMIT_WAIT_TIME){
+  //     delay(RESEND_TIME);
+  //   }
+  //   if((millis() - nowTime) >= LIMIT_WAIT_TIME){
+  //     // LIMIT_WAIT_TIME以上返信が返らない場合は処理を終了する
+  //     return;
+  //   }
+  //   byte result = core_wire->read();
+  //   if(result == (byte)SUCCESS){
+  //     // SUCCESSが返ってきたら処理を終了する
+  //     return;
+  //   }else{
+  //     tryTimes++;
+  //   }
+  // }
 }
 //スレーブ送信用イベント
 void AvatarTranstexhter_wire_core::slaveSentEvent(){

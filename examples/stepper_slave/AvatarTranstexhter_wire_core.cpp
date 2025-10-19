@@ -322,30 +322,31 @@ void AvatarTranstexhterDcMotorSlave::receiveDcMotorInfo(int receiveByte){
   // I2C受信
   // updateInfo = wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value);
   // 受信後の処理
-  if(wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value)){
-    switch (command) {
-      case SET_DC_MOTOR_SPEED_L:
-        speed_L = value;
-        updateInfo = true;
-      break;
-      case SET_DC_MOTOR_SPEED_R:
-        speed_R = value;
-        updateInfo = true;
-      break;
-      case GET_DC_MOTOR_SPEED_L:
-        delay(SWITCH_RECEVE);
-        wireCoreInstance->wireCore.setSentCmd(GET_DC_MOTOR_SPEED_L);
-        wireCoreInstance->wireCore.setSentValue(speed_L);
-        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
-      break;
-      case GET_DC_MOTOR_SPEED_R:
-        delay(SWITCH_RECEVE);
-        wireCoreInstance->wireCore.setSentCmd(GET_DC_MOTOR_SPEED_R);
-        wireCoreInstance->wireCore.setSentValue(speed_R);
-        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
-      break;
-    }
-  }
+  wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value);
+  // if(wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value)){
+  //   switch (command) {
+  //     case SET_DC_MOTOR_SPEED_L:
+  //       speed_L = value;
+  //       updateInfo = true;
+  //     break;
+  //     case SET_DC_MOTOR_SPEED_R:
+  //       speed_R = value;
+  //       updateInfo = true;
+  //     break;
+  //     case GET_DC_MOTOR_SPEED_L:
+  //       delay(SWITCH_RECEVE);
+  //       wireCoreInstance->wireCore.setSentCmd(GET_DC_MOTOR_SPEED_L);
+  //       wireCoreInstance->wireCore.setSentValue(speed_L);
+  //       wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
+  //     break;
+  //     case GET_DC_MOTOR_SPEED_R:
+  //       delay(SWITCH_RECEVE);
+  //       wireCoreInstance->wireCore.setSentCmd(GET_DC_MOTOR_SPEED_R);
+  //       wireCoreInstance->wireCore.setSentValue(speed_R);
+  //       wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
+  //     break;
+  //   }
+  // }
 }
 
 // マウスモジュール

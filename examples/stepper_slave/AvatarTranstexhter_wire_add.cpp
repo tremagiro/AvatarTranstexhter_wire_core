@@ -36,14 +36,14 @@ bool AvatarTranstexhter_wire_core::receive(int* command, int* value){
     *command = (int)cmd;
     *value = (int)val;
     // if(core_serial_speed <= 0){
-    //   Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
+    Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
     // }
     // 受信結果代入
-    if(sum != cmd + val){
-      wire_result = FAILURE;
-    }else{
-      wire_result = SUCCESS;
-    }
+    // if(sum != cmd + val){
+    //   wire_result = FAILURE;
+    // }else{
+    //   wire_result = SUCCESS;
+    // }
     return true; 
   }else{
     return false;
