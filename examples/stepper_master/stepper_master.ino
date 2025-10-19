@@ -17,10 +17,10 @@ void loop() {
   myAvatar.setStepperInfo(SPEED, STEP);
   Serial.printf("【送信値】speed : %d, step : %d \n", SPEED, STEP);
   delay(1000);
-  // // 値受信
-  // int sp;
-  // int st;
-  // myAvatar.getStepperInfo(&sp, &st);
-  // Serial.printf("【受信値】speed : %d, step : %d \n", sp, st);
-  // delay(1000);
+  // 値受信
+  int sp;
+  int st;
+  myAvatar.getStepperInfo(&sp, &st);
+  Serial.printf("【受信値】speed : %d, step : %d \n", sp, st);
+  delay(1000);
 }

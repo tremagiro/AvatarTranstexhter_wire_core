@@ -227,27 +227,38 @@ bool AvatarTranstexhter_wire_core::getStepperInfo(int* speed, int* step){
   sent_wire(STEPPER_ADDRESS, GET_STEPPER_SPEED, 0);
   int command;
   int count = 0;
-  do{// 正しい値が来るまで繰り返す
-    delay(SWITCH_RECEVE);
-    core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
-    receive_read(&command, speed);
-    count++;
-  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
-  if(wire_result == FAILURE){
-    return false;
-  }
-  // 回転角度の取得
+  delay(SWITCH_RECEVE);
+  core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+  delay(SWITCH_RECEVE);
+  receive_read(&command, speed);
+  delay(SWITCH_RECEVE);
   sent_wire(STEPPER_ADDRESS, GET_STEPPER_STEP, 0);
-  count = 0;
-  do{// 正しい値が来るまで繰り返す
-    delay(SWITCH_RECEVE);
-    core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
-    receive_read(&command, step);
-    count++;
-  }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
-  if(wire_result == FAILURE){
-    return false;
-  }
+  delay(SWITCH_RECEVE);
+  core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+  delay(SWITCH_RECEVE);
+  receive_read(&command, step);
+  delay(SWITCH_RECEVE);
+  // do{// 正しい値が来るまで繰り返す
+  //   delay(SWITCH_RECEVE);
+  //   core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+  //   receive_read(&command, speed);
+  //   count++;
+  // }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  // if(wire_result == FAILURE){
+  //   return false;
+  // }
+  // // 回転角度の取得
+  // sent_wire(STEPPER_ADDRESS, GET_STEPPER_STEP, 0);
+  // count = 0;
+  // do{// 正しい値が来るまで繰り返す
+  //   delay(SWITCH_RECEVE);
+  //   core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+  //   receive_read(&command, step);
+  //   count++;
+  // }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
+  // if(wire_result == FAILURE){
+  //   return false;
+  // }
   return true;
 }
 // マスター側から通信を受け取るメソッド(スレーブ側)

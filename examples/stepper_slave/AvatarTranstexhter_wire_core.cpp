@@ -90,6 +90,7 @@ void AvatarTranstexhter_wire_core::slaveSentEvent(){
       // core_wire->write((uint8_t*)&val, sizeof(val));
       // // テェックサム（コマンド＋値）送信（２バイト）
       // core_wire->write((uint8_t*)&sum, sizeof(sum));
+      Serial.printf("sentCmd : %d, sentValue : %d \n", sentCmd, sentValue);
       sent(sentCmd, sentValue);
       // 受信結果の送信状態へ戻す
       wire_result = SUCCESS;
@@ -138,6 +139,7 @@ bool AvatarTranstexhter_wire_core::slaveReceiveEvent(int* command, int* value){
   //   return false;
   // }
   receive(command, value);
+  return true;
 }
 
 //受信したcmdとvalueを格納する
@@ -254,6 +256,7 @@ void AvatarTranstexhterStepperSlave::receiveStepperInfo(int receiveByte){
   // I2C受信
   // updateInfo = wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value);
   // 受信後の処理
+  // Serial.println("receiveStepperInfo");
   if(wireCoreInstance->wireCore.slaveReceiveEvent(&command, &value)){
     switch (command) {
       case SET_STEPPER_SPEED:
@@ -265,12 +268,14 @@ void AvatarTranstexhterStepperSlave::receiveStepperInfo(int receiveByte){
         updateInfo = true;
       break;
       case GET_STEPPER_SPEED:
+        Serial.println("GET_STEPPER_SPEED");
         delay(SWITCH_RECEVE);
         wireCoreInstance->wireCore.setSentCmd(GET_STEPPER_SPEED);
         wireCoreInstance->wireCore.setSentValue(speed);
         wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
       case GET_STEPPER_STEP:
+        Serial.println("GET_STEPPER_STEP");
         delay(SWITCH_RECEVE);
         wireCoreInstance->wireCore.setSentCmd(GET_STEPPER_STEP);
         wireCoreInstance->wireCore.setSentValue(step);
