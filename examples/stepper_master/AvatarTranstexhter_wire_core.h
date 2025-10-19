@@ -51,7 +51,7 @@ class AvatarTranstexhter_wire_core{
   private:
     // inline static TwoWire* core_wire = nullptr;
     role_module core_role;
-    int core_serial_speed;
+    inline static int core_serial_speed;
     bool enable_serial = false;
     inline static wire_result_enum wire_result = FAILURE;
     inline static result_status resultStatus = RESULT_SENT;
@@ -80,7 +80,7 @@ class AvatarTranstexhter_wire_core{
     //初期化
     void init();
     //cmdとvalueを定めたルールに則って文字列にし、送信する
-    void sent_wire(int address, int command, int value);
+    bool sent_wire(int address, int command, int value);
     //受信したcmdとvalueを格納する
     bool receive_read(int* command, int* value);
     // ステッピングモーター

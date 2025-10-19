@@ -30,14 +30,40 @@ void AvatarTranstexhter_wire_core::init(){
 
 // I2C経由でコマンドを送信するメソッド 
 //cmdとvalueを定めたルールに則って文字列にし、送信する
-void AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value){
+bool AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value){
   static int16_t maxValue = INT16_MAX - INT8_MAX;
   if(value > maxValue){
     value = maxValue;
   }
-  core_wire->beginTransmission(address);
-  sent(command, value);
-  core_wire->endTransmission();
+  // 送信処理
+  int tryTimes = 0;
+  while(tryTimes < LIMIT_TRY_TIMES){
+    core_wire->beginTransmission(address);
+    sent(command, value);
+    core_wire->endTransmission();
+    break;
+    // 返信要求（１バイト）
+    core_wire->requestFrom(address, 1);
+    unsigned long nowTime = millis();
+    // LIMIT_WAIT_TIME未満待機する
+    while(core_wire->available() <= 0 && (millis() - nowTime) < LIMIT_WAIT_TIME){
+      delay(RESEND_TIME);
+    }
+    // 受信返信なし
+    if((millis() - nowTime) >= LIMIT_WAIT_TIME){
+      return false;
+    }
+    // 受信結果を受け取る
+    byte result = core_wire->read();
+    if(result == (byte)SUCCESS){
+      // SUCCESSが返ってきたら処理を終了する
+      return true;
+    }else{
+      // 失敗した場合は再送
+      tryTimes++;
+    }
+  }
+  return true;
   // int8_t cmd = (int8_t)command;
   // int16_t val = (int16_t)value;
   // int16_t sum = (int16_t)cmd + (int16_t)val;
@@ -103,8 +129,6 @@ void AvatarTranstexhter_wire_core::slaveSentEvent(){
   }
 }
 
-
-
 // スレーブ受信用イベント
 bool AvatarTranstexhter_wire_core::slaveReceiveEvent(int* command, int* value){
   // int8_t cmd;
@@ -140,7 +164,13 @@ bool AvatarTranstexhter_wire_core::slaveReceiveEvent(int* command, int* value){
   // }else{
   //   return false;
   // }
-  receive(command, value);
+  if(receive(command, value)){
+    wire_result = SUCCESS;
+    return true;
+  }else{
+    wire_result = FAILURE;
+    return false;
+  }
 }
 
 //受信したcmdとvalueを格納する
@@ -227,38 +257,32 @@ bool AvatarTranstexhter_wire_core::getStepperInfo(int* speed, int* step){
   sent_wire(STEPPER_ADDRESS, GET_STEPPER_SPEED, 0);
   int command;
   int count = 0;
+  bool result = false;
   delay(SWITCH_RECEVE);
-  core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
-  delay(SWITCH_RECEVE);
-  receive_read(&command, speed);
-  delay(SWITCH_RECEVE);
+  // 回転速度を取得
+  do{// 正しい値が来るまで繰り返す
+    core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+    delay(SWITCH_RECEVE);
+    result = receive_read(&command, speed);
+    delay(SWITCH_RECEVE);
+    count++;
+  }while(result == false && count < LIMIT_TRY_TIMES);
+  if(result == false){
+    return false;
+  }
+  // 回転角度の取得
+  count = 0;
   sent_wire(STEPPER_ADDRESS, GET_STEPPER_STEP, 0);
-  delay(SWITCH_RECEVE);
-  core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
-  delay(SWITCH_RECEVE);
-  receive_read(&command, step);
-  delay(SWITCH_RECEVE);
-  // do{// 正しい値が来るまで繰り返す
-  //   delay(SWITCH_RECEVE);
-  //   core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
-  //   receive_read(&command, speed);
-  //   count++;
-  // }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
-  // if(wire_result == FAILURE){
-  //   return false;
-  // }
-  // // 回転角度の取得
-  // sent_wire(STEPPER_ADDRESS, GET_STEPPER_STEP, 0);
-  // count = 0;
-  // do{// 正しい値が来るまで繰り返す
-  //   delay(SWITCH_RECEVE);
-  //   core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
-  //   receive_read(&command, step);
-  //   count++;
-  // }while(wire_result == FAILURE && count < LIMIT_TRY_TIMES);
-  // if(wire_result == FAILURE){
-  //   return false;
-  // }
+  do{// 正しい値が来るまで繰り返す
+    core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+    delay(SWITCH_RECEVE);
+    result = receive_read(&command, step);
+    delay(SWITCH_RECEVE);
+    count++;
+  }while(result == false && count < LIMIT_TRY_TIMES);
+  if(result == false){
+    return false;
+  }
   return true;
 }
 // マスター側から通信を受け取るメソッド(スレーブ側)
