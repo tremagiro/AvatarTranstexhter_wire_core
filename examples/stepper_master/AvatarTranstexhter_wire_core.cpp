@@ -38,21 +38,13 @@ bool AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value
   // 送信処理
   int tryTimes = 0;
   while(tryTimes < LIMIT_TRY_TIMES){
+    Serial.println("senting...");
     core_wire->beginTransmission(address);
     sent(command, value);
-    core_wire->endTransmission();
+    core_wire->endTransmission(true);
     break;
     // 返信要求（１バイト）
     core_wire->requestFrom(address, 1);
-    unsigned long nowTime = millis();
-    // LIMIT_WAIT_TIME未満待機する
-    while(core_wire->available() <= 0 && (millis() - nowTime) < LIMIT_WAIT_TIME){
-      delay(RESEND_TIME);
-    }
-    // 受信返信なし
-    if((millis() - nowTime) >= LIMIT_WAIT_TIME){
-      return false;
-    }
     // 受信結果を受け取る
     byte result = core_wire->read();
     if(result == (byte)SUCCESS){
@@ -63,7 +55,7 @@ bool AvatarTranstexhter_wire_core::sent_wire(int address, int command, int value
       tryTimes++;
     }
   }
-  return true;
+  return false;
   // int8_t cmd = (int8_t)command;
   // int16_t val = (int16_t)value;
   // int16_t sum = (int16_t)cmd + (int16_t)val;
