@@ -1,4 +1,4 @@
-#include <AvatarTranstexhter_wire_core.h>
+#include "AvatarTranstexhter_wire_core.h"
 
 AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, 115200);
 
@@ -14,13 +14,13 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   // 値送信
-  myAvatar.setDcMotor(SPEED_L, SPEED_R);
+  myAvatar.setDcMotorInfo(SPEED_L, SPEED_R);
   Serial.printf("【送信値】speed_L : %d, speed_R : %d \n", SPEED_L, SPEED_R);
   delay(1000);
   // 値受信
   int spL;
   int spR;
-  myAvatar.getDcMotor(&spL, &spR);
+  myAvatar.getDcMotorInfo(&spL, &spR);
   Serial.printf("【受信値】speed_L : %d, speed_R : %d \n", spL, spR);
   delay(1000);
 }

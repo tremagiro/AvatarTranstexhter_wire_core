@@ -1,4 +1,4 @@
-#include <AvatarTranstexhter_wire_core.h>
+#include "AvatarTranstexhter_wire_core.h"
 
 AvatarTranstexhterDcMotorSlave myDcMotor = AvatarTranstexhterDcMotorSlave(&Wire, 115200);
 
@@ -10,7 +10,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(myDcMotor.receiveDcMotorInfo() == true){
+  if(myDcMotor.updateDcMotor() == true){
     Serial.printf("【設定値】speed_L : %d, speed_R : %d \n", myDcMotor.getSpeedL(), myDcMotor.getSpeedR());
+  }else{
+    Serial.println("未更新");
+    delay(500);
   }
 }

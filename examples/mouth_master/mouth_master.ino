@@ -1,4 +1,4 @@
-#include <AvatarTranstexhter_wire_core.h>
+#include "AvatarTranstexhter_wire_core.h"
 
 AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, 115200);
 
@@ -14,13 +14,13 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   // 値送信
-  myAvatar.setFrontDisplay(IMAGE_TYPE, LOOP_TIME);
+  myAvatar.setFrontDisplayInfo(IMAGE_TYPE, LOOP_TIME);
   Serial.printf("【送信値】imageType : %d, loopTime : %d \n", IMAGE_TYPE, LOOP_TIME);
   delay(1000);
   // 値受信
   int it;
   int lt;
-  myAvatar.getFrontDisplay(&it, &lt);
+  myAvatar.getFrontDisplayInfo(&it, &lt);
   Serial.printf("【受信値】imageType : %d, loopTime : %d \n", it, lt);
   delay(1000);
 }

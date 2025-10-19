@@ -1,0 +1,1 @@
+/Users/mahiro/Documents/Arduino/AvatarTranstexhter_wire_core /examples/stepper_master/AvatarTranstexhter_wire_Stepper.cpp

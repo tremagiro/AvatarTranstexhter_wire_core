@@ -1,4 +1,4 @@
-#include <AvatarTranstexhter_wire_core.h>
+#include "AvatarTranstexhter_wire_core.h"
 
 AvatarTranstexhterMouthSlave myMouth= AvatarTranstexhterMouthSlave(&Wire, 115200);
 
@@ -10,7 +10,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(myMouth.receiveMouthInfo() == true){
+  if(myMouth.updateMouth() == true){
     Serial.printf("【設定値】imageType : %d, loopTime : %d \n", myMouth.getImageType(), myMouth.getLoopTime());
+  }else{
+    Serial.println("未検出");
+    delay(500);
   }
 }

@@ -207,7 +207,7 @@ class AvatarTranstexhterDcMotorSlave{
       wireCore.core_wire->onReceive(receiveDcMotorInfo);
     }
     // I2Cから信号を受け取って一度も読み込まれていないか
-    bool updateStepper(){
+    bool updateDcMotor(){
       return updateInfo;
     }
 };
@@ -260,7 +260,7 @@ class AvatarTranstexhterMouthSlave{
       wireCore.core_wire->onReceive(receiveMouthInfo);
     }
     // I2Cから信号を受け取って一度も読み込まれていないか
-    bool updateStepper(){
+    bool updateMouth(){
       return updateInfo;
     }
 };
