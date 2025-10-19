@@ -137,4 +137,5 @@ bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
     delay(LIMIT_TRY_TIMES);
     tryTimes++;
   }
+  return true;
 }
