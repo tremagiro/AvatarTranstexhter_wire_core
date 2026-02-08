@@ -59,7 +59,7 @@ class AvatarTranstexhter_wire_core{
   private:
     // inline static TwoWire* core_wire = nullptr;
     role_module core_role;
-    inline static int core_serial_speed;
+    // inline static int core_serial_speed;
     bool enable_serial = false;
     inline static wire_result_enum wire_result = FAILURE;
     inline static result_status resultStatus = RESULT_SENT;
@@ -77,13 +77,13 @@ class AvatarTranstexhter_wire_core{
   public:
     // I2Cインスタンス
     inline static TwoWire* core_wire = nullptr;
-    AvatarTranstexhter_wire_core(TwoWire* wire, int serial_speed = 0, role_module role = MASTER){
+    AvatarTranstexhter_wire_core(TwoWire* wire, role_module role = MASTER){
       core_wire = wire;
       core_role = role;
-      core_serial_speed = serial_speed;
-      if(core_serial_speed != 0){
-        enable_serial = true;
-      }
+      // core_serial_speed = serial_speed;
+      // if(core_serial_speed != 0){
+      //   enable_serial = true;
+      // }
     }
     //初期化
     void init();
@@ -131,7 +131,7 @@ class AvatarTranstexhterStepperSlave{
     // マスター側から通信を受け取るメソッド(スレーブ側)
     static void receiveStepperInfo(int receiveByte);
   public:
-    AvatarTranstexhterStepperSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, STEPPER_MODULE){
+    AvatarTranstexhterStepperSlave(TwoWire* wire) : wireCore(wire, STEPPER_MODULE){
       wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド
@@ -184,7 +184,7 @@ class AvatarTranstexhterDcMotorSlave{
     // マスター側から通信を受け取るメソッド(スレーブ側)
     static void receiveDcMotorInfo(int receiveByte);
   public:
-    AvatarTranstexhterDcMotorSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, DC_MOTOR_MODULE){
+    AvatarTranstexhterDcMotorSlave(TwoWire* wire) : wireCore(wire, DC_MOTOR_MODULE){
       wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド
@@ -237,7 +237,7 @@ class AvatarTranstexhterMouthSlave{
     // マスター側から通信を受け取るメソッド(スレーブ側)
     static void receiveMouthInfo(int receiveByte);
   public:
-    AvatarTranstexhterMouthSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, MOUTH_MODULE){
+    AvatarTranstexhterMouthSlave(TwoWire* wire) : wireCore(wire, MOUTH_MODULE){
       wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド

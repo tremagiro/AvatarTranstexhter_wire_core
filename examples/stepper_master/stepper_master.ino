@@ -1,6 +1,6 @@
 #include "AvatarTranstexhter_wire_core.h"
 
-AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, 115200);
+AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire);
 
 #define SPEED 230
 #define STEP 123
