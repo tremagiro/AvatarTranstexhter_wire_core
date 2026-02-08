@@ -1,6 +1,6 @@
 #include <AvatarTranstexhter_wire_core.h>
 
-AvatarTranstexhterDcMotorSlave myDcMotor = AvatarTranstexhterDcMotorSlave(&Wire, 115200);
+AvatarTranstexhterDcMotorSlave myDcMotor = AvatarTranstexhterDcMotorSlave(&Wire);
 
 void setup() {
   // put your setup code here, to run once:

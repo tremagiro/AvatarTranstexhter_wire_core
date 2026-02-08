@@ -1,4 +1,4 @@
-#include "AvatarTranstexhter_wire_core.h"
+#include <AvatarTranstexhter_wire_core.h>
 
 AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire);
 
@@ -7,8 +7,6 @@ AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire);
 
 void setup() {
   // put your setup code here, to run once:
-  Wire.setSDA(16);
-  Wire.setSCL(17);
   Serial.begin(115200);
   myAvatar.init();
 }

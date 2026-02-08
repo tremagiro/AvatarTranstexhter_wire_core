@@ -19,9 +19,11 @@
 #define GET_DC_MOTOR_SPEED_L 0x07
 #define GET_DC_MOTOR_SPEED_R 0x08
 #define SET_MOUTH_IMAGE_TYPE 0x09
-#define SET_MOUTH_LOOP_TIME 0x10
-#define GET_MOUTH_IMAGE_TYPE 0x11
-#define GET_MOUTH_LOOP_TIME 0x12
+#define SET_MOUTH_LOOP_TIME 0x0a
+#define GET_MOUTH_IMAGE_TYPE 0x0b
+#define GET_MOUTH_LOOP_TIME 0x0c
+#define SET_STEPPER_MODE 0x0d
+#define GET_STEPPER_MODE 0x0e
 
 #define INFO_SIZE 5
 #define LIMIT_TRY_TIMES 5
@@ -47,11 +49,17 @@ enum result_status{
   VALUE_SENT
 };
 
+enum mode_stepper{
+  DUAL,
+  A,
+  B
+};
+
 class AvatarTranstexhter_wire_core{
   private:
     // inline static TwoWire* core_wire = nullptr;
     role_module core_role;
-    inline static int core_serial_speed;
+    // inline static int core_serial_speed;
     bool enable_serial = false;
     inline static wire_result_enum wire_result = FAILURE;
     inline static result_status resultStatus = RESULT_SENT;
@@ -69,13 +77,13 @@ class AvatarTranstexhter_wire_core{
   public:
     // I2Cインスタンス
     inline static TwoWire* core_wire = nullptr;
-    AvatarTranstexhter_wire_core(TwoWire* wire, int serial_speed = 0, role_module role = MASTER){
+    AvatarTranstexhter_wire_core(TwoWire* wire, role_module role = MASTER){
       core_wire = wire;
       core_role = role;
-      core_serial_speed = serial_speed;
-      if(core_serial_speed != 0){
-        enable_serial = true;
-      }
+      // core_serial_speed = serial_speed;
+      // if(core_serial_speed != 0){
+      //   enable_serial = true;
+      // }
     }
     //初期化
     void init();
@@ -86,8 +94,12 @@ class AvatarTranstexhter_wire_core{
     // ステッピングモーター
     // ステッピングモーター設定用メソッド(マスター側)
     void setStepperInfo(int speed, int step);
-    // ステッピングモーターの設定を取得するメソッド(スレーブ側)
+    // ステッピングモーターの設定を取得するメソッド(マスター側)
     bool getStepperInfo(int* sp, int* st);
+    // ステッピングモーターの動作モード設定用メソッド(マスター側)
+    void setStepperMode(mode_stepper mode);
+    // ステッピングモーターの動作モード取得用メソッド(マスター側)
+    bool getStepperMode(mode_stepper* mp);
     // DCモーター
     // DCモーターの速度調整用メソッド(マスター側)
     void setDcMotorInfo(int speed_l, int speed_r);
@@ -112,13 +124,14 @@ class AvatarTranstexhterStepperSlave{
     inline static int step;
     inline static int tmpSpeed;
     inline static int tmpStep;
+    inline static mode_stepper mode;
     inline static bool updateInfo;
     AvatarTranstexhter_wire_core wireCore;
     static AvatarTranstexhterStepperSlave* wireCoreInstance;
     // マスター側から通信を受け取るメソッド(スレーブ側)
     static void receiveStepperInfo(int receiveByte);
   public:
-    AvatarTranstexhterStepperSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, STEPPER_MODULE){
+    AvatarTranstexhterStepperSlave(TwoWire* wire) : wireCore(wire, STEPPER_MODULE){
       wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド
@@ -171,7 +184,7 @@ class AvatarTranstexhterDcMotorSlave{
     // マスター側から通信を受け取るメソッド(スレーブ側)
     static void receiveDcMotorInfo(int receiveByte);
   public:
-    AvatarTranstexhterDcMotorSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, DC_MOTOR_MODULE){
+    AvatarTranstexhterDcMotorSlave(TwoWire* wire) : wireCore(wire, DC_MOTOR_MODULE){
       wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド
@@ -224,7 +237,7 @@ class AvatarTranstexhterMouthSlave{
     // マスター側から通信を受け取るメソッド(スレーブ側)
     static void receiveMouthInfo(int receiveByte);
   public:
-    AvatarTranstexhterMouthSlave(TwoWire* wire, int serial_speed = 0) : wireCore(wire, serial_speed, MOUTH_MODULE){
+    AvatarTranstexhterMouthSlave(TwoWire* wire) : wireCore(wire, MOUTH_MODULE){
       wireCoreInstance = this;
     }
     // メンバ変数取得・設定用メソッド

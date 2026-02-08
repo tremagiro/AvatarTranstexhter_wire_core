@@ -2,10 +2,10 @@
 
 //初期化
 void AvatarTranstexhter_wire_core::init(){
-  if(core_serial_speed > 0){
-    Serial.begin(core_serial_speed);
-    enable_serial = true;
-  }
+  // if(core_serial_speed > 0){
+  //   Serial.begin(core_serial_speed);
+  //   enable_serial = true;
+  // }
   switch(core_role){
     case MASTER:
       core_wire->begin();
@@ -59,9 +59,9 @@ bool AvatarTranstexhter_wire_core::receive(int* command, int* value){
     // 代入
     *command = (int)cmd;
     *value = (int)val;
-    if(core_serial_speed > 0){
-      Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
-    }
+    // if(core_serial_speed > 0){
+    //   Serial.printf("sum:%d, cmd:%d, val:%d\n",(int)sum, (int)cmd, (int)val);
+    // }
     // 受信結果代入
     if(sum != cmd + val){
       wire_result = FAILURE;
