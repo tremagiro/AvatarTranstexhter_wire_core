@@ -42,6 +42,43 @@ bool AvatarTranstexhter_wire_core::getStepperInfo(int* speed, int* step){
   }
   return true;
 }
+// ステッピングモーターの動作モード設定用メソッド(マスター側)
+void AvatarTranstexhter_wire_core::setStepperMode(mode_stepper mode){
+  sent_wire(STEPPER_ADDRESS, SET_STEPPER_MODE, (int)mode);
+}
+// ステッピングモーターの動作モード取得用メソッド(マスター側)
+bool AvatarTranstexhter_wire_core::getStepperMode(mode_stepper* mp){
+  // 動作モードの取得
+  sent_wire(STEPPER_ADDRESS, GET_STEPPER_MODE, 0);
+  int command;
+  int count = 0;
+  bool result = false;
+  int tmpMode;
+  delay(SWITCH_RECEVE);
+  // 動作モードを取得
+  do{// 正しい値が来るまで繰り返す
+    core_wire->requestFrom(STEPPER_ADDRESS, INFO_SIZE);
+    delay(SWITCH_RECEVE);
+    result = receive_read(&command, &tmpMode);
+    delay(SWITCH_RECEVE);
+    count++;
+  }while(result == false && count < LIMIT_TRY_TIMES);
+  if(result == false){
+    return false;
+  }
+  switch(tmpMode){
+    case 0:
+      *mp = DUAL;
+    break;
+    case 1:
+      *mp = A;
+    break;
+    case 2:
+      *mp = B;
+    break;
+  }
+  return true;
+}
 // マスター側から通信を受け取るメソッド(スレーブ側)
 void AvatarTranstexhterStepperSlave::receiveStepperInfo(int receiveByte){
   int command;
@@ -57,6 +94,20 @@ void AvatarTranstexhterStepperSlave::receiveStepperInfo(int receiveByte){
         step = value;
         updateInfo = true;
       break;
+      case SET_STEPPER_MODE:
+        switch(value){
+          case 0:
+            mode = DUAL;
+          break;
+          case 1:
+            mode = A;
+          break;
+          case 2:
+            mode = B;
+          break;
+        }
+        updateInfo = true;
+      break;
       case GET_STEPPER_SPEED:
         delay(SWITCH_RECEVE);
         wireCoreInstance->wireCore.setSentCmd(GET_STEPPER_SPEED);
@@ -67,6 +118,12 @@ void AvatarTranstexhterStepperSlave::receiveStepperInfo(int receiveByte){
         delay(SWITCH_RECEVE);
         wireCoreInstance->wireCore.setSentCmd(GET_STEPPER_STEP);
         wireCoreInstance->wireCore.setSentValue(step);
+        wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
+      break;
+      case GET_STEPPER_MODE:
+        delay(SWITCH_RECEVE);
+        wireCoreInstance->wireCore.setSentCmd(GET_STEPPER_MODE);
+        wireCoreInstance->wireCore.setSentValue(mode);
         wireCoreInstance->wireCore.setResultStatus(VALUE_SENT);
       break;
     }

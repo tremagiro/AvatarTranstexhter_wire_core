@@ -1,6 +1,6 @@
 #include <AvatarTranstexhter_wire_core.h>
 
-AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, MASTER, 115200);
+AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, MASTER);
 
 void systemSetup();
 void receive(int howByte);

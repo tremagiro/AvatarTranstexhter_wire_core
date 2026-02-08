@@ -1,6 +1,6 @@
 #include <AvatarTranstexhter_wire_core.h>
 
-AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, 115200);
+AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire);
 
 #define IMAGE_TYPE 3
 #define LOOP_TIME 1500

@@ -1,6 +1,6 @@
 #include <AvatarTranstexhter_wire_core.h>
 
-AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, STEPPER_MODULE, 115200);
+AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, STEPPER_MODULE);
 
 void systemSetup();
 void receive(int howByte);

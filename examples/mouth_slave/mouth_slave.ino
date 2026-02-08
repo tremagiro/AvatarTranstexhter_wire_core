@@ -1,6 +1,6 @@
 #include <AvatarTranstexhter_wire_core.h>
 
-AvatarTranstexhterMouthSlave myMouth= AvatarTranstexhterMouthSlave(&Wire, 115200);
+AvatarTranstexhterMouthSlave myMouth= AvatarTranstexhterMouthSlave(&Wire);
 
 void setup() {
   // put your setup code here, to run once:

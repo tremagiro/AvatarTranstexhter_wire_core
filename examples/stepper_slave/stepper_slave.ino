@@ -1,6 +1,6 @@
 #include <AvatarTranstexhter_wire_core.h>
 
-AvatarTranstexhterStepperSlave myStepper = AvatarTranstexhterStepperSlave(&Wire, 115200);
+AvatarTranstexhterStepperSlave myStepper = AvatarTranstexhterStepperSlave(&Wire);
 
 void setup() {
   // put your setup code here, to run once:
