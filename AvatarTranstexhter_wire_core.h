@@ -161,6 +161,12 @@ class AvatarTranstexhterStepperSlave{
       updateInfo = false;
       return step;
     }
+    void setMode(mode_stepper m){
+      mode = m;
+    }
+    mode_stepper getMode(){
+      return mode;
+    }
     // 初期化変数
     void init(){
       wireCore.init();

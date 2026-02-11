@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.6 Chrome/140.0.7339.249 Electron/38.8.0 Safari/537.36" version="29.3.6" pages="10">
   <diagram id="91qUGFrZZmRSVZd3HoaO" name="クラス図">
-    <mxGraphModel dx="1394" dy="959" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="786" dy="554" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -64,7 +64,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="XD5m6vSgKGv7N1DIOJov-1" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="AvatarTranstexhterStepperSlave(TwoWire * wirePointer, int serialSpeed)" vertex="1">
-          <mxGeometry height="330" width="510" x="920" y="30" as="geometry" />
+          <mxGeometry height="350" width="510" x="920" y="30" as="geometry" />
         </mxCell>
         <mxCell id="XD5m6vSgKGv7N1DIOJov-2" parent="XD5m6vSgKGv7N1DIOJov-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- speed : inline static int&lt;div&gt;- step : inline static int&lt;/div&gt;&lt;div&gt;- tmpSpeed : inline static int&lt;/div&gt;&lt;div&gt;- tmpStep : inline static int&lt;/div&gt;&lt;div&gt;- mode : inline static mode_stepper&lt;/div&gt;&lt;div&gt;- updateInfo : bool&lt;/div&gt;&lt;div&gt;- wireCore :&amp;nbsp;&lt;span style=&quot;text-align: center; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;AvatarTranstexhter_wire_core(wirePointer, serialSpeed,&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;text-align: center; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;STEPPER_MODULE&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: center;&quot;&gt;)&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: center;&quot;&gt;- wireCoreInstance : static AvatartexhterStepperSlave*&lt;/span&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="124" width="510" y="26" as="geometry" />
@@ -72,8 +72,8 @@
         <mxCell id="XD5m6vSgKGv7N1DIOJov-3" parent="XD5m6vSgKGv7N1DIOJov-1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" value="" vertex="1">
           <mxGeometry height="8" width="510" y="150" as="geometry" />
         </mxCell>
-        <mxCell id="XD5m6vSgKGv7N1DIOJov-4" parent="XD5m6vSgKGv7N1DIOJov-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ setTmpSpeed(int sp) : void&lt;div&gt;+ getTmpSpeed() : int&lt;/div&gt;&lt;div&gt;+ setTmpStep(int st) : void&lt;/div&gt;&lt;div&gt;+ getTmpStep() : int&lt;/div&gt;&lt;div&gt;+ setSpeed(int sp) : void&lt;div&gt;+ getSpeed() : int&lt;/div&gt;&lt;div&gt;+ setStep(int st) : void&lt;/div&gt;&lt;div&gt;+ getStep() : int&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ init() : void&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ updateStepper() : bool&lt;/div&gt;&lt;div&gt;- receiveStepperInfo(reciveByte : int) : static void&lt;/div&gt;" vertex="1">
-          <mxGeometry height="172" width="510" y="158" as="geometry" />
+        <mxCell id="XD5m6vSgKGv7N1DIOJov-4" parent="XD5m6vSgKGv7N1DIOJov-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ setTmpSpeed(int sp) : void&lt;div&gt;+ getTmpSpeed() : int&lt;/div&gt;&lt;div&gt;+ setTmpStep(int st) : void&lt;/div&gt;&lt;div&gt;+ getTmpStep() : int&lt;/div&gt;&lt;div&gt;+ setSpeed(int sp) : void&lt;div&gt;+ getSpeed() : int&lt;/div&gt;&lt;div&gt;+ setStep(int st) : void&lt;/div&gt;&lt;div&gt;+ getStep() : int&lt;/div&gt;&lt;/div&gt;&lt;div&gt;+ setMode(m : mode_stepper) : void&lt;/div&gt;&lt;div&gt;+ getMode() : mode_stepper&lt;/div&gt;&lt;div&gt;+ init() : void&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ updateStepper() : bool&lt;/div&gt;&lt;div&gt;- receiveStepperInfo(reciveByte : int) : static void&lt;/div&gt;" vertex="1">
+          <mxGeometry height="192" width="510" y="158" as="geometry" />
         </mxCell>
         <mxCell id="XD5m6vSgKGv7N1DIOJov-5" edge="1" parent="1" source="XD5m6vSgKGv7N1DIOJov-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="q_gamo6EYSuxt7M6bLld-2">
           <mxGeometry relative="1" as="geometry">
@@ -129,6 +129,12 @@
         </mxCell>
         <mxCell id="mXygrwkQHmy8_j8ku4r0-4" parent="mXygrwkQHmy8_j8ku4r0-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ B : enum" vertex="1">
           <mxGeometry height="26" width="190" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="jukrQLvAgTGssuyPoC-h-1" edge="1" parent="1" source="q_gamo6EYSuxt7M6bLld-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.005;entryY=0.125;entryDx=0;entryDy=0;entryPerimeter=0;" target="mXygrwkQHmy8_j8ku4r0-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="299" y="280" as="sourcePoint" />
+            <mxPoint x="230" y="479" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
