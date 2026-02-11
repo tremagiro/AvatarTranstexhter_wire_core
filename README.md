@@ -117,6 +117,8 @@ void setSpeed(int sp);
 int getSpeed();
 void setStep(int st);
 int getStep();
+void setMode(mode_stepper m);
+mode_stepper getMode();
 ```
 - 初期化変数
 ```
