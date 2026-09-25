@@ -19,6 +19,9 @@ void AvatarTranstexhter_wire_core::init(){
     case DC_MOTOR_MODULE:
       core_wire->begin(DC_MOTOR_ADDRESS);
     break;
+    case EYE_MODULE:
+      core_wire->begin(EYE_ADDRESS);
+    break;
   }
   if(core_role != MASTER){
     core_wire->onRequest(slaveSentEvent);
@@ -131,11 +134,16 @@ bool AvatarTranstexhter_wire_core::slaveReceiveEvent(int* command, int* value){
 }
 
 //受信したcmdとvalueを格納する
+// 最大 LIMIT_TRY_TIMES 回まで受信を試し、チェックサムの合った値を受け取れたら true を返す。
+// 受け取れなかった場合(相手のスレーブが接続されていない場合など)は false を返す
 bool AvatarTranstexhter_wire_core::receive_read(int* command, int* value){
   int tryTimes = 0;
-  while (tryTimes < LIMIT_TRY_TIMES || !receive(command, value)) {
-    delay(LIMIT_TRY_TIMES);
+  while (tryTimes < LIMIT_TRY_TIMES) {
+    if(receive(command, value) == true && wire_result == SUCCESS){
+      return true;
+    }
+    delay(SWITCH_RECEVE);
     tryTimes++;
   }
-  return true;
+  return false;
 }
