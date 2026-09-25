@@ -1,4 +1,4 @@
-#include "AvatarTranstexhter_wire_core.h"
+#include <AvatarTranstexhter_wire_core.h>
 
 AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire, MASTER);
 
@@ -20,7 +20,7 @@ void loop() {
   systemSetup();
   while(1){
     value = 325;
-    command = SET_DC_MOTOR_SPEED;
+    command = SET_STEPPER_SPEED;
     myAvatar.sent_wire(STEPPER_ADDRESS, command, value);
     delay(1000);
   }

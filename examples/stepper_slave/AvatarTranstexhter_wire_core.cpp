@@ -1,1 +1,0 @@
-../../AvatarTranstexhter_wire_core.cpp
