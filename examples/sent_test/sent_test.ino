@@ -20,7 +20,7 @@ void loop() {
   systemSetup();
   while(1){
     value = 325;
-    command = SET_DC_MOTOR_SPEED;
+    command = SET_STEPPER_SPEED;
     myAvatar.sent_wire(STEPPER_ADDRESS, command, value);
     delay(1000);
   }

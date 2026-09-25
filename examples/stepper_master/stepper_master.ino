@@ -7,6 +7,8 @@ AvatarTranstexhter_wire_core myAvatar = AvatarTranstexhter_wire_core(&Wire);
 
 void setup() {
   // put your setup code here, to run once:
+  Wire.setSDA(16);
+  Wire.setSCL(17);
   Serial.begin(115200);
   myAvatar.init();
 }
